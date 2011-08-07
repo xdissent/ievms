@@ -82,42 +82,40 @@ check_unrar() {
     hash unrar 2>&- || download_unrar
 }
 
-download_vhd() {
+build_ievm() {
     case $1 in
         6) 
             url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_XP_IE6.exe"
             archive="Windows_XP_IE6.exe"
             vhd="Windows XP.vhd"
-            vm="IE6"
             vm_type="WindowsXP"
+            fail "IE6 support is currently disabled"
             ;;
         7) 
             url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_Vista_IE7.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar}"
             archive="Windows_Vista_IE7.part01.exe"
             vhd="Windows Vista.vhd"
-            vm="IE7"
             vm_type="WindowsVista"
             ;;
         8) 
             url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_7_IE8.part0{1.exe,2.rar,3.rar,4.rar}"
             archive="Windows_7_IE8.part01.exe"
             vhd="Win7_IE8.vhd"
-            vm="IE8"
             vm_type="Windows7"
             ;;
         9) 
             url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_7_IE9.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar,7.rar}"
             archive="Windows_7_IE9.part01.exe"
             vhd="Windows 7.vhd"
-            vm="IE9"
             vm_type="Windows7"
             ;;
         *)
-            fail "Invalid IE version"
+            fail "Invalid IE version: ${1}"
             ;;
     esac
 
-    vhd_path="${ievms_home}/vhd/IE${1}"
+    vm="IE${1}"
+    vhd_path="${ievms_home}/vhd/${vm}"
     mkdir -p "${vhd_path}"
     cd "${vhd_path}"
 
@@ -134,6 +132,8 @@ download_vhd() {
                 fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
             fi
         fi
+
+        rm -f "${vhd_path}/*.vmc"
 
         log "Extracting VHD from ${vhd_path}/${archive}"
         if ! unrar e "${archive}"
@@ -158,8 +158,8 @@ download_vhd() {
         VBoxManage storagectl "${vm}" --name "IDE Controller" --add ide --controller PIIX4 --bootable on
         VBoxManage storagectl "${vm}" --name "Floppy Controller" --add floppy
         VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium "${vhd_path}/${vhd}" --setuuid ""
-        VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium "${ga_iso}" --setuuid ""
-        VBoxManage storageattach "${vm}" --storagectl "Floppy Controller" --port 0 --device 0 --type fdd --medium emptydrive --setuuid ""
+        VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium "${ga_iso}"
+        VBoxManage storageattach "${vm}" --storagectl "Floppy Controller" --port 0 --device 0 --type fdd --medium emptydrive
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
     fi
 }
@@ -169,9 +169,11 @@ create_home
 check_virtualbox
 check_unrar
 
-#download_vhd 6
-download_vhd 7
-download_vhd 8
-download_vhd 9
+all_versions="7 8 9"
+for ver in ${IEVMS_VERSIONS:-$all_versions}
+do
+    log "Building IE${ver} VM"
+    build_ievm $ver
+done
 
 log "Done!"
