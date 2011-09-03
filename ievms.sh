@@ -41,9 +41,9 @@ check_virtualbox() {
         if [[ ! -f "${archive}" ]]
         then
             log "Downloading Oracle VM VirtualBox Extension Pack from ${url} to ${ievms_home}/${archive}"
-            if ! curl -L "${url}" -o "${archive}"
+            if ! wget "${url}" -O "${archive}"
             then
-                fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
+                fail "Failed to download ${url} to ${ievms_home}/${archive} using 'wget', error code ($?)"
             fi
         fi
 
@@ -63,9 +63,9 @@ download_unrar() {
     archive="rar.tar.gz"
 
     log "Downloading unrar from ${url} to ${ievms_home}/${archive}"
-    if ! curl -L "${url}" -o "${archive}"
+    if ! wget "${url}" -O "${archive}"
     then
-        fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
+        fail "Failed to download ${url} to ${ievms_home}/${archive} using 'wget', error code ($?)"
     fi
 
     if ! tar zxf "${archive}" -C "${ievms_home}/" --no-same-owner
@@ -127,9 +127,9 @@ build_ievm() {
         if [[ ! -f "${archive}" ]]
         then
             log "Downloading VHD from ${url} to ${ievms_home}/"
-            if ! curl -L -O "${url}"
+            if ! wget "${url}"
             then
-                fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
+                fail "Failed to download ${url} to ${vhd_path}/ using 'wget', error code ($?)"
             fi
         fi
 
