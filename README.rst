@@ -35,6 +35,16 @@ to start the install and then go catch a movie, or maybe dinner, or both.
 Once available and started in VirtualBox, the password for ALL VMs is "Password1".
 
 
+Recovering from a failed installation
+-------------------------------------
+
+Each version is installed into a subdirectory of ``~/.ievms/vhd/``. If the installation fails
+for any reason (lost Internet connection, for instance), delete the version-specific subdirectory
+and rerun the install.
+
+If nothing else, you can delete ``~/.ievms`` and rerun the install.
+
+
 Features
 ========
 
