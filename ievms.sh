@@ -36,7 +36,7 @@ check_virtualbox() {
         version="${raw_version/r*/}"
         version="${version/_*/}"        # Linux version numbers often include distro after underscore
         build="${raw_version/*r/}"
-        url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${version}-${build}.vbox-extpack"
+        url="http://download.virtualbox.org/virtualbox/${version}/Oracle_VM_VirtualBox_Extension_Pack-${version}-${build}.vbox-extpack"
         archive="Oracle_VM_VirtualBox_Extension_Pack-${version}-${build}.vbox-extpack"
 
         if [[ ! -f "${archive}" ]]
