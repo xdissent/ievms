@@ -32,11 +32,12 @@ check_virtualbox() {
     log "Checking for Oracle VM VirtualBox Extension Pack"
     if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
     then
-        version=`VBoxManage -v`
-        ext_version="${version/r/-}"
-        short_version="${version/r*/}"
-        url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
-        archive="Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
+        raw_version=`VBoxManage -v`
+        version="${raw_version/r*/}"
+        version="${version/_*/}"        # Linux version numbers often include distro after underscore
+        build="${raw_version/*r/}"
+        url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${version}-${build}.vbox-extpack"
+        archive="Oracle_VM_VirtualBox_Extension_Pack-${version}-${build}.vbox-extpack"
 
         if [[ ! -f "${archive}" ]]
         then
