@@ -55,11 +55,15 @@ check_virtualbox() {
     fi
 }
 
-download_unrar() {
+install_unrar() {
     case $kernel in
-        Darwin) url="http://www.rarlab.com/rar/rarosx-4.0.1.tar.gz" ;;
-        Linux) url="http://www.rarlab.com/rar/rarlinux-4.0.1.tar.gz" ;;
+        Darwin) download_unrar ;;
+        Linux) fail "Linux support requires unrar (sudo apt-get install for Ubuntu/Debian)" ;;
     esac
+}
+
+download_unrar() {
+    url="http://www.rarlab.com/rar/rarosx-4.0.1.tar.gz"
     archive="rar.tar.gz"
 
     log "Downloading unrar from ${url} to ${ievms_home}/${archive}"
@@ -79,7 +83,7 @@ download_unrar() {
 
 check_unrar() {
     PATH="${PATH}:${ievms_home}/rar"
-    hash unrar 2>&- || download_unrar
+    hash unrar 2>&- || install_unrar
 }
 
 build_ievm() {

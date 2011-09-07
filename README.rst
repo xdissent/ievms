@@ -12,7 +12,8 @@ Requirements
 ============
 
 * VirtualBox (http://virtualbox.org)
-* Curl (Ubuntu: ``apt-get install curl``)
+* Curl (Ubuntu: ``sudo apt-get install curl``)
+* Linux Only: unrar (Ubuntu: ``sudo apt-get install unrar``)
 * Patience
 
 
