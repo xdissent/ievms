@@ -20,21 +20,21 @@ Requirements
 Installation
 ============
 
-# Install VirtualBox.
+1. Install VirtualBox.
 
-# Download and unpack ievms:
+2. Download and unpack ievms:
 
-#* Install IE versions 7, 8 and 9 - no support for IE6 currently
+* Install IE versions 7, 8 and 9 - no support for IE6 currently
 
     curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
 
-#* Install specific IE versions (IE7 and IE9 only for example):
+* Install specific IE versions (IE7 and IE9 only for example):
 
     curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | IEVMS_VERSIONS="7 9" bash
 
-# Launch Virtual Box
+3. Launch Virtual Box
 
-# Choose ievm image from Virtual Box
+4. Choose ievm image from Virtual Box
 
 The VHD archives are massive and can take hours or tens of minutes to 
 download, depending on the speed of your internet connection. You might want
