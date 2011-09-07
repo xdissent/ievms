@@ -161,7 +161,8 @@ build_ievm() {
         VBoxManage modifyvm "${vm}" --memory 256 --vram 32
         VBoxManage storagectl "${vm}" --name "IDE Controller" --add ide --controller PIIX4 --bootable on
         VBoxManage storagectl "${vm}" --name "Floppy Controller" --add floppy
-        VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium "${vhd_path}/${vhd}" --setuuid ""
+        VBoxManage internalcommands sethduuid "${vhd_path}/${vhd}"
+        VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium "${vhd_path}/${vhd}"
         VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium "${ga_iso}"
         VBoxManage storageattach "${vm}" --storagectl "Floppy Controller" --port 0 --device 0 --type fdd --medium emptydrive
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
