@@ -8,6 +8,11 @@ can be extremely difficult. These scripts aim to facilitate that process using
 VirtualBox on Linux or OS X. With a single command, you can have IE7, IE8
 and IE9 running in separate virtual machines.
 
+.. image:: http://pledgie.com/campaigns/15995.png?skin_name=chrome
+    :alt: Click here to lend your support to ievms and make a donation at pledgie.com!
+    :target: http://pledgie.com/campaigns/15995
+
+
 Requirements
 ============
 
