@@ -66,3 +66,9 @@ Clean Snapshot
     lock us out after 30 days of unactivated use. By reverting to the 
     ``clean`` snapshot the countdown to the activation apocalypse is reset,
     effectively allowing your VM to work indefinitely.
+
+
+License
+=======
+
+None. (To quote Morrissey, "take it, it's yours")
