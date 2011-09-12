@@ -4,7 +4,7 @@ Overview
 Microsoft provides virtual machine disk images to facilitate website testing 
 in multiple versions of IE, regardless of the host operating system. 
 Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
-can be extremely difficult. These scripts aim to facilitate that process using
+can be extremely difficult. The ievms scripts aim to facilitate that process using
 VirtualBox on Linux or OS X. With a single command, you can have IE7, IE8
 and IE9 running in separate virtual machines.
 
@@ -25,6 +25,10 @@ Requirements
 Installation
 ============
 
+1. Install VirtualBox.
+
+2. Download and unpack ievms:
+
 * Install IE versions 7, 8 and 9 - no support for IE6 currently
 
     curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
@@ -33,6 +37,9 @@ Installation
 
     curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | IEVMS_VERSIONS="7 9" bash
 
+3. Launch Virtual Box
+
+4. Choose ievm image from Virtual Box
 
 The VHD archives are massive and can take hours or tens of minutes to 
 download, depending on the speed of your internet connection. You might want
