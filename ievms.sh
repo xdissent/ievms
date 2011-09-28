@@ -12,6 +12,10 @@ fail() { log "\nERROR: $*\n" ; exit 1 ; }
 
 create_home() {
     ievms_home="${HOME}/.ievms"
+    if INSTALL_PATH
+    then
+        ievms_home="${INSTALL_PATH}/.ievms"
+    fi
     mkdir -p "${ievms_home}"
     cd "${ievms_home}"
 }
