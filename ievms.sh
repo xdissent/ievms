@@ -11,11 +11,13 @@ log()  { printf "$*\n" ; return $? ;  }
 fail() { log "\nERROR: $*\n" ; exit 1 ; }
 
 create_home() {
-    ievms_home="${HOME}/.ievms"
-    if INSTALL_PATH
+    if [[ -z "${INSTALL_PATH}" ]]
     then
-        ievms_home="${INSTALL_PATH}/.ievms"
+      ievms_home="${HOME}/.ievms"
+    else
+      ievms_home="${INSTALL_PATH}/.ievms"
     fi
+
     mkdir -p "${ievms_home}"
     cd "${ievms_home}"
 }
@@ -154,7 +156,7 @@ build_ievm() {
     log "Checking for existing ${vm} VM"
     if ! VBoxManage showvminfo "${vm}"
     then
-        
+
         case $kernel in
             Darwin) ga_iso="/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso" ;;
             Linux) ga_iso="/usr/share/virtualbox/VBoxGuestAdditions.iso" ;;
