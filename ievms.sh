@@ -15,7 +15,7 @@ create_home() {
     then
       ievms_home="${HOME}/.ievms"
     else
-      ievms_home="${INSTALL_PATH}/.ievms"
+      ievms_home="${INSTALL_PATH}"
     fi
 
     mkdir -p "${ievms_home}"
