@@ -11,12 +11,8 @@ log()  { printf "$*\n" ; return $? ;  }
 fail() { log "\nERROR: $*\n" ; exit 1 ; }
 
 create_home() {
-    if [[ -z "${INSTALL_PATH}" ]]
-    then
-      ievms_home="${HOME}/.ievms"
-    else
-      ievms_home="${INSTALL_PATH}"
-    fi
+    def_ievms_home="${HOME}/.ievms"
+    ievms_home=${INSTALL_PATH:-$def_ievms_home}
 
     mkdir -p "${ievms_home}"
     cd "${ievms_home}"
