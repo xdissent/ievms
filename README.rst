@@ -58,6 +58,14 @@ and rerun the install.
 If nothing else, you can delete ``~/.ievms`` and rerun the install.
 
 
+Specifying the install path
+---------------------------
+
+To specify where the VMs are installed, use the INSTALL_PATH variable:
+
+    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | INSTALL_PATH="/Path/to/.ievms" bash
+
+
 Features
 ========
 
