@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Caution is a virtue
-#set -o nounset
+set -o nounset
 set -o errtrace
 set -o errexit
 set -o pipefail
@@ -50,7 +50,7 @@ download_file() {
   then
     $DOWNLOADER -L $1 -o "$2"
   else
-    $DOWNLOADER $1 -O "$2"
+    $DOWNLOADER -c $1 -O "$2"
   fi
 }
 
@@ -201,7 +201,7 @@ build_ievm() {
         log "Checking for downloaded VHD at ${vhd_path}/${archive}"
         if [[ ! -s "${vhd_path}/${archive}" ]]
         then
-            log "Downloading VHD from ${url} to ${ievms_home}/"
+            log "Downloading VHD from ${urls[0]} to ${ievms_home}/"
             for url in "${urls[@]}"
             do
               if ! download_file "${url}" "${vhd_path}/$(basename $url)"
