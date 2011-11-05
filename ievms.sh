@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Caution is a virtue
-set -o nounset
+#set -o nounset
 set -o errtrace
 set -o errexit
 set -o pipefail
@@ -9,6 +9,50 @@ set -o pipefail
 log()  { printf "$*\n" ; return $? ;  }
 
 fail() { log "\nERROR: $*\n" ; exit 1 ; }
+
+DOWNLOADER=curl
+DOWNLOADTYPE=1
+EXTPACK=""
+
+while getopts "e:" Option; do
+  case $Option in
+    e)
+      log "using extension pack url: $OPTARG"
+      EXTPACK=$OPTARG
+      ;;
+    \?)
+      fail "Invalid option: -$OPTARG"
+      ;;
+  esac
+done
+
+check_downloader() {
+  if curl=$(which curl)
+  then
+    DOWNLOADER=$curl
+    DOWNLOADTYPE=1
+  else
+    if wget=$(which wget)
+    then
+      DOWNLOADER=$wget
+      DOWNLOADTYPE=2
+    else
+      fail "Curl or wget could not be found"
+    fi
+  fi
+}
+
+download_file() {
+  file=$1
+  output=$2
+
+  if [[ $DOWNLOADTYPE -eq 1 ]]
+  then
+    $DOWNLOADER -L $1 -o "$2"
+  else
+    $DOWNLOADER $1 -O "$2"
+  fi
+}
 
 create_home() {
     def_ievms_home="${HOME}/.ievms"
@@ -34,18 +78,24 @@ check_virtualbox() {
     log "Checking for Oracle VM VirtualBox Extension Pack"
     if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
     then
-        version=`VBoxManage -v`
-        ext_version="${version/r/-}"
-        short_version="${version/r*/}"
-        url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
-        archive="Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
+        if [ "x$EXTPACK" == "x" ]
+        then
+          version=`VBoxManage -v`
+          ext_version="${version/r/-}"
+          short_version="${version/r*/}"
+          url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
+          archive="Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
+        else
+          url=$EXTPACK
+          archive=$(basename $EXTPACK)
+        fi
 
-        if [[ ! -f "${archive}" ]]
+        if [[ ! -s "${ievms_home}/${archive}" ]]
         then
             log "Downloading Oracle VM VirtualBox Extension Pack from ${url} to ${ievms_home}/${archive}"
-            if ! curl -L "${url}" -o "${archive}"
+            if ! download_file "${url}" "${archive}"
             then
-                fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
+                fail "Failed to download ${url} to ${ievms_home}/${archive} using '$DOWNLOADER', error code ($?)"
             fi
         fi
 
@@ -69,9 +119,9 @@ download_unrar() {
     archive="rar.tar.gz"
 
     log "Downloading unrar from ${url} to ${ievms_home}/${archive}"
-    if ! curl -L "${url}" -o "${archive}"
+    if ! download_file "${url}" "${archive}"
     then
-        fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
+        fail "Failed to download ${url} to ${ievms_home}/${archive} using '$DOWNLOADER', error code ($?)"
     fi
 
     if ! tar zxf "${archive}" -C "${ievms_home}/" --no-same-owner
@@ -90,27 +140,46 @@ check_unrar() {
 
 build_ievm() {
     case $1 in
-        6) 
-            url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_XP_IE6.exe"
+        6)
+            urls=( "http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_XP_IE6.exe" )
             archive="Windows_XP_IE6.exe"
             vhd="Windows XP.vhd"
             vm_type="WindowsXP"
             fail "IE6 support is currently disabled"
             ;;
-        7) 
-            url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_Vista_IE7.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar}"
+        7)
+            urls=( \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part01.exe" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part02.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part03.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part04.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part05.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part06.rar" \
+            )
             archive="Windows_Vista_IE7.part01.exe"
             vhd="Windows Vista.vhd"
             vm_type="WindowsVista"
             ;;
-        8) 
-            url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_7_IE8.part0{1.exe,2.rar,3.rar,4.rar}"
+        8)
+            urls=( \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE8.part01.exe" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE8.part02.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE8.part03.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE8.part04.rar" \
+            )
             archive="Windows_7_IE8.part01.exe"
             vhd="Win7_IE8.vhd"
             vm_type="Windows7"
             ;;
-        9) 
-            url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_7_IE9.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar,7.rar}"
+        9)
+            urls=( \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part01.exe" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part02.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part03.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part04.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part05.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part07.rar" \
+            )
             archive="Windows_7_IE9.part01.exe"
             vhd="Windows 7.vhd"
             vm_type="Windows7"
@@ -130,13 +199,16 @@ build_ievm() {
     then
 
         log "Checking for downloaded VHD at ${vhd_path}/${archive}"
-        if [[ ! -f "${archive}" ]]
+        if [[ ! -s "${vhd_path}/${archive}" ]]
         then
             log "Downloading VHD from ${url} to ${ievms_home}/"
-            if ! curl -L -O "${url}"
-            then
-                fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
-            fi
+            for url in "${urls[@]}"
+            do
+              if ! download_file "${url}" "${vhd_path}/$(basename $url)"
+              then
+                  fail "Failed to download ${url} to ${vhd_path}/ using '$DOWNLOADER', error code ($?)"
+              fi
+            done
         fi
 
         rm -f "${vhd_path}/*.vmc"
@@ -172,6 +244,7 @@ build_ievm() {
 }
 
 check_system
+check_downloader
 create_home
 check_virtualbox
 check_unrar
