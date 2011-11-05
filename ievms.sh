@@ -130,7 +130,7 @@ build_ievm() {
     then
 
         log "Downloading VHD from ${url} to ${ievms_home}/"
-        if ! echo ${url} | xargs -n1 -P5 curl -L -O -C -
+        if ! echo ${url} | xargs -n1 -P10 curl -L -O -C -
         then
             fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
         fi
