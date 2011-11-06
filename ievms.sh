@@ -188,6 +188,7 @@ build_ievm() {
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part03.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part04.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part05.rar" \
+              "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part06.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part07.rar" \
             )
             archive=$(basename ${urls[0]})
@@ -208,18 +209,18 @@ build_ievm() {
     if [[ ! -f "${vhd}" ]]
     then
 
-        log "Checking for downloaded VHD at ${vhd_path}/${archive}"
-        if [[ ! -s "${vhd_path}/${archive}" ]]
-        then
-            log "Downloading VHD from ${urls[0]} to ${ievms_home}/"
-            for url in "${urls[@]}"
-            do
-              if ! download_file "${url}" "${vhd_path}/$(basename $url)"
-              then
-                  fail "Failed to download ${url} to ${vhd_path}/ using '$DOWNLOADER', error code ($?)"
-              fi
-            done
-        fi
+        for url in "${urls[@]}"
+        do
+          log "Checking for downloaded VHD at ${vhd_path}/${url}"
+          if [[ ! -s "${vhd_path}/${url}" ]]
+          then
+            log "Downloading VHD from ${urls} to ${ievms_home}/"
+            if ! download_file "${url}" "${vhd_path}/$(basename $url)"
+            then
+                fail "Failed to download ${url} to ${vhd_path}/ using '$DOWNLOADER', error code ($?)"
+            fi
+          fi
+        done
 
         rm -f "${vhd_path}/*.vmc"
 
