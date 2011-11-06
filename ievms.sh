@@ -13,15 +13,25 @@ fail() { log "\nERROR: $*\n" ; exit 1 ; }
 DOWNLOADER=curl
 DOWNLOADTYPE=1
 EXTPACK=""
+GA_ADDONS=""
+GA_ADDONS_URL=""
 
-while getopts "e:" Option; do
+while getopts "e:a:d:" Option; do
   case $Option in
     e)
       log "using extension pack url: $OPTARG"
       EXTPACK=$OPTARG
       ;;
+    d)
+      log "Guest Addons iso url to download: $OPTARG"
+      GA_ADDONS_URL=$OPTARG
+      ;;
+    a)
+      log "using addons iso dir: $OPTARG"
+      GA_ADDONS=$OPTARG
+      ;;
     \?)
-      fail "Invalid option: -$OPTARG"
+      exit 1
       ;;
   esac
 done
@@ -156,7 +166,7 @@ build_ievm() {
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part05.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part06.rar" \
             )
-            archive="Windows_Vista_IE7.part01.exe"
+            archive=$(basename ${urls[0]})
             vhd="Windows Vista.vhd"
             vm_type="WindowsVista"
             ;;
@@ -167,7 +177,7 @@ build_ievm() {
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE8.part03.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE8.part04.rar" \
             )
-            archive="Windows_7_IE8.part01.exe"
+            archive=$(basename ${urls[0]})
             vhd="Win7_IE8.vhd"
             vm_type="Windows7"
             ;;
@@ -180,7 +190,7 @@ build_ievm() {
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part05.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part07.rar" \
             )
-            archive="Windows_7_IE9.part01.exe"
+            archive=$(basename ${urls[0]})
             vhd="Windows 7.vhd"
             vm_type="Windows7"
             ;;
@@ -221,15 +231,29 @@ build_ievm() {
         fi
     fi
 
+    if [[ $GA_ADDONS_URL != "" ]]
+    then
+      if ! download_file "$GA_ADDONS_URL" "$ievms_home/$(basename $GA_ADDONS_URL)"
+      then
+          fail "Failed to download ${GA_ADDONS_URL} to ${ievms_home}/"
+      fi
+    fi
+
     log "Checking for existing ${vm} VM"
     if ! VBoxManage showvminfo "${vm}"
     then
-
-        case $kernel in
-            Darwin) ga_iso="/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso" ;;
-            Linux) ga_iso="/usr/share/virtualbox/VBoxGuestAdditions.iso" ;;
-        esac
-
+        if [[ $GA_ADDONS == "" && $GA_ADDONS_URL == "" ]]
+        then
+          case $kernel in
+              Darwin) ga_iso="/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso" ;;
+              Linux) ga_iso="/usr/share/virtualbox/VBoxGuestAdditions.iso" ;;
+          esac
+        elif [[ $GA_ADDONS_URL != "" ]]
+        then
+          ga_iso=$ievms_home/$(basename $GA_ADDONS_URL)
+        else
+          ga_iso=$GA_ADDONS
+        fi
         log "Creating ${vm} VM"
         VBoxManage createvm --name "${vm}" --ostype "${vm_type}" --register
         VBoxManage modifyvm "${vm}" --memory 256 --vram 32
