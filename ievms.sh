@@ -58,7 +58,8 @@ download_file() {
 
   if [[ $DOWNLOADTYPE -eq 1 ]]
   then
-    $DOWNLOADER -L $1 -o "$2"
+    # -C - tries to resume download from where it was left
+    $DOWNLOADER -C - -L $1 -o "$2"
   else
     $DOWNLOADER -c $1 -O "$2"
   fi
