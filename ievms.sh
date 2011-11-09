@@ -166,6 +166,14 @@ build_ievm() {
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part05.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_Vista_IE7.part06.rar" \
             )
+            md5s=( \
+              0e6cc7b812cb4a0a2740cb271708ba10 \
+              5e0c6f37dbb011e5f3870ce1a20b5c61 \
+              0c9e1d25f2e590ae4d3215e8b1bd8825 \
+              c3c4edabc458f21fe2211845bf1d51f7 \
+              17e48893ded8587c972743af825dea67 \
+              d5e9e11476ba33cee0494a48b7fb085a \
+            )
             archive=$(basename ${urls[0]})
             vhd="Windows Vista.vhd"
             vm_type="WindowsVista"
@@ -176,6 +184,12 @@ build_ievm() {
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE8.part02.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE8.part03.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE8.part04.rar" \
+            )
+            md5s=( \
+              31636fb412fd2e9fd250d4b831a70903 \
+              6fdb27bc33e56dd2928c86fa8101b0e4 \
+              64b26e846d0fdf515a97a2234edddc2e \
+              cf838d245245975723d975cef581fcbb \
             )
             archive=$(basename ${urls[0]})
             vhd="Win7_IE8.vhd"
@@ -190,6 +204,15 @@ build_ievm() {
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part05.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part06.rar" \
               "http://www.microsoft.com/downloads/info.aspx?na=41&srcfamilyid=21eabb90-958f-4b64-b5f1-73d0a413c8ef&srcdisplaylang=en&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f2%2fB72085AE-0F04-4C6F-9182-BF1EE90F5273%2fWindows_7_IE9.part07.rar" \
+            )
+            md5s=( \
+              4ad277a45ebe98e4d56d4adad14a64f6 \
+              b5e74d497424509d981ef2fa1d22a873 \
+              239c9b4a0ea67187c96861100688c180 \
+              2e1fb5f62de4fd5b364c91712b038ed0 \
+              6789d8e438f5d5934a72b874ad9acf17 \
+              c47aa0336d32f25c7d5f30e3d1261b4e \
+              a5966bc97e6d7b03dd32c048c0d0ee5d \
             )
             archive=$(basename ${urls[0]})
             vhd="Windows 7.vhd"
@@ -208,20 +231,45 @@ build_ievm() {
     log "Checking for existing VHD at ${vhd_path}/${vhd}"
     if [[ ! -f "${vhd}" ]]
     then
-
+        i=0
         for url in "${urls[@]}"
         do
-          log "Checking for downloaded VHD at ${vhd_path}/${url}"
-          if [[ ! -s "${vhd_path}/${url}" ]]
-          then
-            log "Downloading VHD from ${urls} to ${ievms_home}/"
-            if ! download_file "${url}" "${vhd_path}/$(basename $url)"
+          downloaded=0
+          d=0
+          file=${vhd_path}/$(basename $url)
+          # Try redownloading if md5 mismatches up to 3 times
+          while true;
+          do
+            log "Checking for downloaded VHD at $file"
+            if [[ ! -s $file ]]
             then
-                fail "Failed to download ${url} to ${vhd_path}/ using '$DOWNLOADER', error code ($?)"
+              log "Downloading VHD from ${urls} to ${ievms_home}/"
+              if ! download_file "${url}" "$file"
+              then
+                  fail "Failed to download ${url} to ${vhd_path}/ using '$DOWNLOADER', error code ($?)"
+              fi
+            else
+              log "Checking md5sum of file " $file " for " ${md5s[$i]}
+              md5sum=$(md5sum $file|awk '{ print $1 }')
+              if [[ $md5sum == ${md5s[$i]} ]]
+              then
+                downloaded=1
+              fi
             fi
-          fi
+            if [[ $downloaded -eq 1 ]]
+            then
+              log "Downloaded successfully"
+              break
+            fi
+            d=$(($d+1))
+            if [[ $d -eq 4 ]]
+            then
+              fail "Download of file $file failed at least 3 times"
+              break;
+            fi;
+          done
+          i=$(($i+1))
         done
-
         rm -f "${vhd_path}/*.vmc"
 
         log "Extracting VHD from ${vhd_path}/${archive}"
@@ -231,6 +279,8 @@ build_ievm() {
                 "unrar command returned error code $?"
         fi
     fi
+
+
 
     if [[ $GA_ADDONS_URL != "" ]]
     then
