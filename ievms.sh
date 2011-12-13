@@ -131,15 +131,10 @@ build_ievm() {
         for url in $urls
         do
             archive=`basename $url`
-            if [[ ! -f "${archive}" ]]
+            log "Downloading VHD from ${url} to ${ievms_home}/"
+            if ! curl $CURL_EXTRA_OPTS -C - -L -O "${url}"
             then
-                log "Downloading VHD from ${url} to ${ievms_home}/"
-                if ! curl $CURL_EXTRA_OPTS -L -O "${url}"
-                then
-                    fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
-                fi
-            else
-                log "VHD ${archive} already downloaded, skipping"
+                fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
             fi
         done
 
