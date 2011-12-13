@@ -6,6 +6,8 @@ set -o errtrace
 set -o errexit
 set -o pipefail
 
+CURL_EXTRA_OPTS="--limit-rate 50k"
+
 log()  { printf "$*\n" ; return $? ;  }
 
 fail() { log "\nERROR: $*\n" ; exit 1 ; }
@@ -132,7 +134,7 @@ build_ievm() {
             if [[ ! -f "${archive}" ]]
             then
                 log "Downloading VHD from ${url} to ${ievms_home}/"
-                if ! curl -L -O "${url}"
+                if ! curl $CURL_EXTRA_OPTS -L -O "${url}"
                 then
                     fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
                 fi
