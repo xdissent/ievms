@@ -95,7 +95,6 @@ build_ievm() {
             archive="Windows_XP_IE6.exe"
             vhd="Windows XP.vhd"
             vm_type="WindowsXP"
-            fail "IE6 support is currently disabled"
             ;;
         7) 
             url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_Vista_IE7.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar}"
@@ -169,6 +168,55 @@ build_ievm() {
         VBoxManage storageattach "${vm}" --storagectl "Floppy Controller" --port 0 --device 0 --type fdd --medium emptydrive
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
     fi
+
+    declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
+}
+
+build_ievm_ie6() {
+    log "Setting up ${vm} VM"
+
+    if [[ ! -f "drivers/PRO2KXP.exe" ]]
+    then
+        download_driver "http://downloadmirror.intel.com/8659/eng/PRO2KXP.exe" "Downloading 82540EM network adapter driver"
+
+        if [[ ! -f "drivers/autorun.inf" ]]
+        then
+            cd "drivers"
+            echo '[autorun]' > autorun.inf
+            echo 'open=PRO2KXP.exe' >> autorun.inf
+            cd ..
+        fi
+    fi
+
+    log "Changing network adapter to 82540EM"
+    VBoxManage modifyvm "${vm}" --nictype1 "82540EM"
+
+    build_and_attach_drivers
+}
+
+download_driver() {
+    if [[ ! -d "drivers" ]]
+    then
+        mkdir -p "drivers"
+    fi
+
+    log $2
+
+    cd "drivers"
+    curl -L -O $1
+    cd ..
+}
+
+build_and_attach_drivers() {
+    log "Building drivers ISO for ${vm}"
+    if [[ ! -f "drivers.iso" ]]
+    then
+      log "Writing drivers ISO"
+
+      mkisofs -o drivers.iso drivers
+    fi
+
+    VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium "${ievms_home}/vhd/IE6/drivers.iso"
 }
 
 check_system
@@ -176,7 +224,7 @@ create_home
 check_virtualbox
 check_unrar
 
-all_versions="7 8 9"
+all_versions="6 7 8 9"
 for ver in ${IEVMS_VERSIONS:-$all_versions}
 do
     log "Building IE${ver} VM"
