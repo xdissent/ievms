@@ -166,25 +166,25 @@ build_ievm() {
         VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium "${vhd_path}/${vhd}"
         VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium "${ga_iso}"
         VBoxManage storageattach "${vm}" --storagectl "Floppy Controller" --port 0 --device 0 --type fdd --medium emptydrive
+        declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
     fi
 
-    declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
 }
 
 build_ievm_ie6() {
     log "Setting up ${vm} VM"
 
-    if [[ ! -f "drivers/PRO2KXP.exe" ]]
+    if [[ ! -f "${ievms_home}/drivers/PRO2KXP.exe" ]]
     then
         download_driver "http://downloadmirror.intel.com/8659/eng/PRO2KXP.exe" "Downloading 82540EM network adapter driver"
 
-        if [[ ! -f "drivers/autorun.inf" ]]
+        if [[ ! -f "${ievms_home}/drivers/autorun.inf" ]]
         then
-            cd "drivers"
+            cd "${ievms_home}/drivers"
             echo '[autorun]' > autorun.inf
             echo 'open=PRO2KXP.exe' >> autorun.inf
-            cd ..
+            cd "${ievms_home}"
         fi
     fi
 
@@ -195,28 +195,32 @@ build_ievm_ie6() {
 }
 
 download_driver() {
-    if [[ ! -d "drivers" ]]
+    if [[ ! -d "${ievms_home}/drivers" ]]
     then
-        mkdir -p "drivers"
+        mkdir -p "${ievms_home}/drivers"
     fi
 
     log $2
 
-    cd "drivers"
+    cd "${ievms_home}/drivers"
     curl -L -O $1
     cd ..
 }
 
 build_and_attach_drivers() {
     log "Building drivers ISO for ${vm}"
-    if [[ ! -f "drivers.iso" ]]
+    if [[ ! -f "${ievms_home}/drivers.iso" ]]
     then
       log "Writing drivers ISO"
 
-      mkisofs -o drivers.iso drivers
+      
+      case $kernel in
+          Darwin) hdiutil makehybrid "${ievms_home}/drivers" -o "${ievms_home}/drivers.iso" ;;
+          Linux) mkisofs -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
+      esac
     fi
 
-    VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium "${ievms_home}/vhd/IE6/drivers.iso"
+    VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium "${ievms_home}/drivers.iso"
 }
 
 check_system
