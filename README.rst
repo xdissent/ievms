@@ -5,12 +5,12 @@ Microsoft provides virtual machine disk images to facilitate website testing
 in multiple versions of IE, regardless of the host operating system. 
 Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
 can be extremely difficult. The ievms scripts aim to facilitate that process using
-VirtualBox on Linux or OS X. With a single command, you can have IE7, IE8
+VirtualBox on Linux or OS X. With a single command, you can have IE6, IE7, IE8
 and IE9 running in separate virtual machines.
 
 .. image:: http://pledgie.com/campaigns/15995.png?skin_name=chrome
-    :alt: Click here to lend your support to ievms and make a donation at pledgie.com!
-    :target: http://pledgie.com/campaigns/15995
+   :alt: Click here to lend your support to ievms and make a donation at pledgie.com!
+   :target: http://pledgie.com/campaigns/15995
 
 
 Requirements
@@ -29,17 +29,25 @@ Installation
 
 2. Download and unpack ievms:
 
-* Install IE versions 7, 8 and 9 - no support for IE6 currently
+   * Install IE versions 6, 7, 8 and 9.
 
-    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
+         curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
 
-* Install specific IE versions (IE7 and IE9 only for example):
+   * Install specific IE versions (IE7 and IE9 only for example):
 
-    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | IEVMS_VERSIONS="7 9" bash
+         curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | IEVMS_VERSIONS="7 9" bash
 
-3. Launch Virtual Box
+3. Launch Virtual Box.
 
-4. Choose ievm image from Virtual Box
+4. Choose ievms image from Virtual Box.
+
+5. Install VirtualBox Guest Additions (pre-mounted as CD image in the VM).
+
+6. **IE6 only** - Install network adapter drivers by opening the ``drivers`` CD image in the VM.
+
+.. note:: The IE6 network drivers *must* be installed upon first boot, or an
+   activation loop will prevent subsequent logins forever. If this happens, 
+   restoring to the ``clean`` snapshot will reset the activation lock.
 
 The VHD archives are massive and can take hours or tens of minutes to 
 download, depending on the speed of your internet connection. You might want

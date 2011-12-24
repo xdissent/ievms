@@ -95,7 +95,6 @@ build_ievm() {
             archive="Windows_XP_IE6.exe"
             vhd="Windows XP.vhd"
             vm_type="WindowsXP"
-            fail "IE6 support is currently disabled"
             ;;
         7) 
             url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_Vista_IE7.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar}"
@@ -167,8 +166,61 @@ build_ievm() {
         VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium "${vhd_path}/${vhd}"
         VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium "${ga_iso}"
         VBoxManage storageattach "${vm}" --storagectl "Floppy Controller" --port 0 --device 0 --type fdd --medium emptydrive
+        declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
     fi
+
+}
+
+build_ievm_ie6() {
+    log "Setting up ${vm} VM"
+
+    if [[ ! -f "${ievms_home}/drivers/PRO2KXP.exe" ]]
+    then
+        download_driver "http://downloadmirror.intel.com/8659/eng/PRO2KXP.exe" "Downloading 82540EM network adapter driver"
+
+        if [[ ! -f "${ievms_home}/drivers/autorun.inf" ]]
+        then
+            cd "${ievms_home}/drivers"
+            echo '[autorun]' > autorun.inf
+            echo 'open=PRO2KXP.exe' >> autorun.inf
+            cd "${ievms_home}"
+        fi
+    fi
+
+    log "Changing network adapter to 82540EM"
+    VBoxManage modifyvm "${vm}" --nictype1 "82540EM"
+
+    build_and_attach_drivers
+}
+
+download_driver() {
+    if [[ ! -d "${ievms_home}/drivers" ]]
+    then
+        mkdir -p "${ievms_home}/drivers"
+    fi
+
+    log $2
+
+    cd "${ievms_home}/drivers"
+    curl -L -O $1
+    cd ..
+}
+
+build_and_attach_drivers() {
+    log "Building drivers ISO for ${vm}"
+    if [[ ! -f "${ievms_home}/drivers.iso" ]]
+    then
+      log "Writing drivers ISO"
+
+      
+      case $kernel in
+          Darwin) hdiutil makehybrid "${ievms_home}/drivers" -o "${ievms_home}/drivers.iso" ;;
+          Linux) mkisofs -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
+      esac
+    fi
+
+    VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium "${ievms_home}/drivers.iso"
 }
 
 check_system
@@ -176,7 +228,7 @@ create_home
 check_virtualbox
 check_unrar
 
-all_versions="7 8 9"
+all_versions="6 7 8 9"
 for ver in ${IEVMS_VERSIONS:-$all_versions}
 do
     log "Building IE${ver} VM"
