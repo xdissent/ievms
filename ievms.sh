@@ -159,7 +159,7 @@ build_ievm() {
 
         log "Creating ${vm} VM"
         VBoxManage createvm --name "${vm}" --ostype "${vm_type}" --register
-        VBoxManage modifyvm "${vm}" --memory 256 --vram 32
+        VBoxManage modifyvm "${vm}" --memory 1024 --vram 32
         VBoxManage storagectl "${vm}" --name "IDE Controller" --add ide --controller PIIX4 --bootable on
         VBoxManage storagectl "${vm}" --name "Floppy Controller" --add floppy
         VBoxManage internalcommands sethduuid "${vhd_path}/${vhd}"
