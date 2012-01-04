@@ -95,24 +95,28 @@ build_ievm() {
             archive="Windows_XP_IE6.exe"
             vhd="Windows XP.vhd"
             vm_type="WindowsXP"
+            memory="256"
             ;;
         7) 
             url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_Vista_IE7.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar}"
             archive="Windows_Vista_IE7.part01.exe"
             vhd="Windows Vista.vhd"
             vm_type="WindowsVista"
+            memory="512"
             ;;
         8) 
             url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_7_IE8.part0{1.exe,2.rar,3.rar,4.rar}"
             archive="Windows_7_IE8.part01.exe"
             vhd="Win7_IE8.vhd"
             vm_type="Windows7"
+            memory="1024"
             ;;
         9) 
             url="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_7_IE9.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar,7.rar}"
             archive="Windows_7_IE9.part01.exe"
             vhd="Windows 7.vhd"
             vm_type="Windows7"
+            memory="1024"
             ;;
         *)
             fail "Invalid IE version: ${1}"
@@ -159,7 +163,7 @@ build_ievm() {
 
         log "Creating ${vm} VM"
         VBoxManage createvm --name "${vm}" --ostype "${vm_type}" --register
-        VBoxManage modifyvm "${vm}" --memory 1024 --vram 32
+        VBoxManage modifyvm "${vm}" --memory "${memory}" --vram 32
         VBoxManage storagectl "${vm}" --name "IDE Controller" --add ide --controller PIIX4 --bootable on
         VBoxManage storagectl "${vm}" --name "Floppy Controller" --add floppy
         VBoxManage internalcommands sethduuid "${vhd_path}/${vhd}"
