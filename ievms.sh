@@ -43,7 +43,7 @@ check_virtualbox() {
         if [[ ! -f "${archive}" ]]
         then
             log "Downloading Oracle VM VirtualBox Extension Pack from ${url} to ${ievms_home}/${archive}"
-            if ! curl -L "${url}" -o "${archive}"
+            if ! curl -L -R "${url}" -o "${archive}"
             then
                 fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
             fi
@@ -69,7 +69,7 @@ download_unrar() {
     archive="rar.tar.gz"
 
     log "Downloading unrar from ${url} to ${ievms_home}/${archive}"
-    if ! curl -L "${url}" -o "${archive}"
+    if ! curl -L -R "${url}" -o "${archive}"
     then
         fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
     fi
@@ -132,7 +132,7 @@ build_ievm() {
         if [[ ! -f "${archive}" ]]
         then
             log "Downloading VHD from ${url} to ${ievms_home}/"
-            if ! curl -L -O "${url}"
+            if ! curl -L -R -O "${url}"
             then
                 fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
             fi
@@ -203,7 +203,7 @@ download_driver() {
     log $2
 
     cd "${ievms_home}/drivers"
-    curl -L -O $1
+    curl -L -R -O $1
     cd ..
 }
 
