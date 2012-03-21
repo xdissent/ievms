@@ -65,7 +65,7 @@ install_unrar() {
 }
 
 download_unrar() {
-    url="http://www.rarlab.com/rar/rarosx-4.0.1.tar.gz"
+    url="http://www.rarlab.com/rar/rarosx-4.1.1.tar.gz"
     archive="rar.tar.gz"
 
     log "Downloading unrar from ${url} to ${ievms_home}/${archive}"
