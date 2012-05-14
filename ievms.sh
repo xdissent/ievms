@@ -35,8 +35,14 @@ check_virtualbox() {
     if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
     then
         version=`VBoxManage -v`
-        ext_version="${version/r/-}"
-        short_version="${version/r*/}"
+        if [[ "$version" == *_Ubuntu* ]] # Ubuntu 12.04 modified the version message
+        then
+            ext_version="${version/_Ubuntur/-}"
+            short_version="${version/_Ubuntur*/}"
+        else
+            ext_version="${version/r/-}"
+            short_version="${version/r*/}"
+        fi
         url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
         archive="Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
 
