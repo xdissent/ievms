@@ -60,7 +60,7 @@ Recovering from a failed installation
 -------------------------------------
 
 Each version is installed into a subdirectory of ``~/.ievms/vhd/``. If the installation fails
-for any reason (lost Internet connection, for instance), delete the version-specific subdirectory
+for any reason (corrupted download, for instance), delete the version-specific subdirectory
 and rerun the install.
 
 If nothing else, you can delete ``~/.ievms`` and rerun the install.
@@ -72,6 +72,15 @@ Specifying the install path
 To specify where the VMs are installed, use the INSTALL_PATH variable:
 
     curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | INSTALL_PATH="/Path/to/.ievms" bash
+
+
+Passing additional options to curl
+----------------------------------
+
+The ``curl`` command is passed any options present in the ``CURL_OPTS`` 
+environment variable. For example, you can set a download speed limit:
+
+    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | CURL_OPTS="--limit-rate 50k" bash
 
 
 Features
@@ -89,6 +98,12 @@ Clean Snapshot
     lock us out after 30 days of unactivated use. By reverting to the 
     ``clean`` snapshot the countdown to the activation apocalypse is reset,
     effectively allowing your VM to work indefinitely.
+
+
+Resuming Downloads
+    If one of the comically large files fails to download, the ``curl`` 
+    command used will automatically attempt to resume where it left off. 
+    Thanks, rcmachado (https://github.com/rcmachado).
 
 
 License

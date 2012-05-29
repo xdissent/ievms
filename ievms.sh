@@ -6,7 +6,7 @@ set -o errtrace
 set -o errexit
 set -o pipefail
 
-CURL_EXTRA_OPTS="--limit-rate 50k"
+curl_opts=${CURL_OPTS:-""}
 
 log()  { printf "$*\n" ; return $? ;  }
 
@@ -42,13 +42,10 @@ check_virtualbox() {
         url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
         archive="Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
 
-        if [[ ! -f "${archive}" ]]
+        log "Downloading Oracle VM VirtualBox Extension Pack from ${url} to ${ievms_home}/${archive}"
+        if ! curl ${curl_opts} -C - -L "${url}" -o "${archive}"
         then
-            log "Downloading Oracle VM VirtualBox Extension Pack from ${url} to ${ievms_home}/${archive}"
-            if ! curl -L "${url}" -o "${archive}"
-            then
-                fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
-            fi
+            fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
         fi
 
         log "Installing Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}"
@@ -71,7 +68,7 @@ download_unrar() {
     archive="rar.tar.gz"
 
     log "Downloading unrar from ${url} to ${ievms_home}/${archive}"
-    if ! curl -L "${url}" -o "${archive}"
+    if ! curl ${curl_opts} -C - -L "${url}" -o "${archive}"
     then
         fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
     fi
@@ -131,13 +128,13 @@ build_ievm() {
         do
             archive=`basename $url`
             log "Downloading VHD from ${url} to ${ievms_home}/"
-            if ! curl $CURL_EXTRA_OPTS -C - -L -O "${url}"
+            if ! curl ${curl_opts} -C - -L -O "${url}"
             then
                 fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
             fi
         done
 
-        rm -f "${vhd_path}/*.vmc"
+        rm -f "${vhd_path}/"*.vmc
 
         log "Extracting VHD from ${vhd_path}/${archive}"
         if ! unrar e "${archive}"
@@ -202,7 +199,11 @@ download_driver() {
     log $2
 
     cd "${ievms_home}/drivers"
-    curl -L -O $1
+    # Currently the IE6 driver download server doesn't support resume
+    if ! curl ${curl_opts} -L -O "$1"
+    then
+        fail "Failed to download $1 to ${ievms_home}/drivers/ using 'curl', error code ($?)"
+    fi
     cd ..
 }
 
