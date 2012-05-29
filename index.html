@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>ievms by xdissent</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>ievms</h1>
+        <p>Automated installation of the Microsoft IE App Compat virtual machines</p>
+        <p class="view"><a href="https://github.com/xdissent/ievms">View the Project on GitHub <small>xdissent/ievms</small></a></p>
+        <ul>
+          <li><a href="https://github.com/xdissent/ievms/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/xdissent/ievms/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/xdissent/ievms">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Overview</h1>
+
+<p>Microsoft provides virtual machine disk images to facilitate website testing 
+in multiple versions of IE, regardless of the host operating system. 
+Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
+can be extremely difficult. The ievms scripts aim to facilitate that process using
+VirtualBox on Linux or OS X. With a single command, you can have IE6, IE7, IE8
+and IE9 running in separate virtual machines.</p>
+
+<p><a href="http://pledgie.com/campaigns/15995"><img src="http://pledgie.com/campaigns/15995.png?skin_name=chrome" alt="Click here to lend your support to ievms and make a donation at pledgie.com!"></a></p>
+
+<h1>Requirements</h1>
+
+<ul>
+<li>VirtualBox (<a href="http://virtualbox.org">http://virtualbox.org</a>)</li>
+<li>Curl (Ubuntu: <code>sudo apt-get install curl</code>)</li>
+<li>Linux Only: unrar (Ubuntu: <code>sudo apt-get install unrar</code>)</li>
+<li>Patience</li>
+</ul><h1>Installation</h1>
+
+<ol>
+<li><p>Install VirtualBox.</p></li>
+<li><p>Download and unpack ievms:</p></li>
+</ol><ul>
+<li>
+<p>Install IE versions 6, 7, 8 and 9.</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
+</code></pre>
+</li>
+<li>
+<p>Install specific IE versions (IE7 and IE9 only for example):</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | IEVMS_VERSIONS="7 9" bash
+</code></pre>
+</li>
+</ul><ol>
+<li><p>Launch Virtual Box.</p></li>
+<li><p>Choose ievms image from Virtual Box.</p></li>
+<li><p>Install VirtualBox Guest Additions (pre-mounted as CD image in the VM).</p></li>
+<li>
+<p><strong>IE6 only</strong> - Install network adapter drivers by opening the <code>drivers</code> CD image in the VM.</p>
+
+<p><strong>NOTE:</strong> The IE6 network drivers <em>must</em> be installed upon first boot, or an
+activation loop will prevent subsequent logins forever. If this happens, 
+restoring to the <code>clean</code> snapshot will reset the activation lock.</p>
+</li>
+</ol><p>The VHD archives are massive and can take hours or tens of minutes to 
+download, depending on the speed of your internet connection. You might want
+to start the install and then go catch a movie, or maybe dinner, or both. </p>
+
+<p>Once available and started in VirtualBox, the password for ALL VMs is "Password1".</p>
+
+<h2>Recovering from a failed installation</h2>
+
+<p>Each version is installed into a subdirectory of <code>~/.ievms/vhd/</code>. If the installation fails
+for any reason (corrupted download, for instance), delete the version-specific subdirectory
+and rerun the install.</p>
+
+<p>If nothing else, you can delete <code>~/.ievms</code> and rerun the install.</p>
+
+<h2>Specifying the install path</h2>
+
+<p>To specify where the VMs are installed, use the INSTALL_PATH variable:</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | INSTALL_PATH="/Path/to/.ievms" bash
+</code></pre>
+
+<h2>Passing additional options to curl</h2>
+
+<p>The <code>curl</code> command is passed any options present in the <code>CURL_OPTS</code> 
+environment variable. For example, you can set a download speed limit:</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | CURL_OPTS="--limit-rate 50k" bash
+</code></pre>
+
+<h1>Features</h1>
+
+<h2>Clean Snapshot</h2>
+
+<p>A snapshot is automatically taken upon install, allowing rollback to the
+pristine virtual environment configuration. Anything can go wrong in 
+Windows and rather than having to worry about maintaining a stable VM,
+you can simply revert to the <code>clean</code> snapshot to reset your VM to the
+initial state.</p>
+
+<p>The VMs provided by Microsoft will not pass the Windows Genuine Advantage
+and cannot be activated. Unfortunately for us, that means our VMs will
+lock us out after 30 days of unactivated use. By reverting to the 
+<code>clean</code> snapshot the countdown to the activation apocalypse is reset,
+effectively allowing your VM to work indefinitely.</p>
+
+<h2>Resuming Downloads</h2>
+
+<p>If one of the comically large files fails to download, the <code>curl</code> 
+command used will automatically attempt to resume where it left off. </p>
+
+<h1>License</h1>
+
+<p>None. (To quote Morrissey, "take it, it's yours")</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/xdissent">xdissent</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
