@@ -36,7 +36,7 @@ check_virtualbox() {
     log "Checking for Oracle VM VirtualBox Extension Pack"
     if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
     then
-        version=`VBoxManage -v`
+        version=`VBoxManage -v | sed 's/_\(.*\)r/r/g'`
         ext_version="${version/r/-}"
         short_version="${version/r*/}"
         url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
