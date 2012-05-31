@@ -137,7 +137,7 @@ build_ievm() {
         rm -f "${vhd_path}/"*.vmc
 
         log "Extracting VHD from ${vhd_path}/${archive}"
-        if ! unrar e "${archive}"
+        if ! unrar e -y "${archive}"
         then
             fail "Failed to extract ${archive} to ${vhd_path}/${vhd}," \
                 "unrar command returned error code $?"
