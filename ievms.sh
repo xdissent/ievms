@@ -37,6 +37,9 @@ check_virtualbox() {
     if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
     then
         version=`VBoxManage -v`
+        if [ -e /etc/debian_version ]; then
+            version="${version/_Debian/}"
+        fi
         ext_version="${version/r/-}"
         short_version="${version/r*/}"
         url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
