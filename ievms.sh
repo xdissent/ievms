@@ -87,6 +87,18 @@ check_unrar() {
     hash unrar 2>&- || install_unrar
 }
 
+check_hdiutil() {
+    hash hdiutil 2>&- || fail "Darwin support requires hdiutil"
+}
+
+check_mkisofs() {
+    MKISOFS="mkisofs"
+    hash mkisofs 2>&- || {
+        hash genisoimage 2>&- || fail "Linux support requires mkisofs/genisoimage (sudo apt-get install for Ubuntu/Debian)"
+        MKISOFS="genisoimage"
+    }
+}
+
 build_ievm() {
     case $1 in
         6) 
@@ -216,7 +228,7 @@ build_and_attach_drivers() {
       
       case $kernel in
           Darwin) hdiutil makehybrid "${ievms_home}/drivers" -o "${ievms_home}/drivers.iso" ;;
-          Linux) mkisofs -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
+          Linux) "${MKISOFS}" -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
       esac
     fi
 
@@ -227,6 +239,10 @@ check_system
 create_home
 check_virtualbox
 check_unrar
+case $kernel in
+    Darwin) check_hdiutil ;;
+    Linux) check_mkisofs ;;
+esac
 
 all_versions="6 7 8 9"
 for ver in ${IEVMS_VERSIONS:-$all_versions}
