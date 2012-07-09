@@ -87,6 +87,14 @@ check_unrar() {
     hash unrar 2>&- || install_unrar
 }
 
+check_hdiutil() {
+    hash hdiutil 2>&- || fail "Darwin support requires hdiutil"
+}
+
+check_mkisofs() {
+    hash mkisofs 2>&- || fail "Linux support requires mkisofs (sudo apt-get install for Ubuntu/Debian)"
+}
+
 build_ievm() {
     case $1 in
         6) 
@@ -227,6 +235,10 @@ check_system
 create_home
 check_virtualbox
 check_unrar
+case $kernel in
+    Darwin) check_hdiutil ;;
+    Linux) check_mkisofs ;;
+esac
 
 all_versions="6 7 8 9"
 for ver in ${IEVMS_VERSIONS:-$all_versions}
