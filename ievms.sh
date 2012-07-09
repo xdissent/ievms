@@ -92,7 +92,11 @@ check_hdiutil() {
 }
 
 check_mkisofs() {
-    hash mkisofs 2>&- || fail "Linux support requires mkisofs (sudo apt-get install for Ubuntu/Debian)"
+    MKISOFS="mkisofs"
+    hash mkisofs 2>&- || {
+        hash genisoimage 2>&- || fail "Linux support requires mkisofs/genisoimage (sudo apt-get install for Ubuntu/Debian)"
+        MKISOFS="genisoimage"
+    }
 }
 
 build_ievm() {
@@ -224,7 +228,7 @@ build_and_attach_drivers() {
       
       case $kernel in
           Darwin) hdiutil makehybrid "${ievms_home}/drivers" -o "${ievms_home}/drivers.iso" ;;
-          Linux) mkisofs -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
+          Linux) "${MKISOFS}" -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
       esac
     fi
 
