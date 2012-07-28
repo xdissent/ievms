@@ -227,21 +227,21 @@ parse_options() {
     while getopts ":m:v:" opt; do
         case $opt in
             m ) 
-				    if [[ ${OPTARG} =~ ^[0-9]+$ ]]; then
+                if [[ ${OPTARG} =~ ^[0-9]+$ ]]; then
                     vbox_memory=${OPTARG}
-					 else
-					     echo "WARNING: Invalid option for vbox_memory [${OPTARG}].  Using default value of ${vbox_memory}."
-					 fi ;;
-				v ) 
-				    if [[ ${OPTARG} =~ ^[0-9]+$ ]]; then
+                else
+                    echo "WARNING: Invalid option for vbox_memory [${OPTARG}].  Using default value of ${vbox_memory}."
+                fi ;;
+            v ) 
+                if [[ ${OPTARG} =~ ^[0-9]+$ ]]; then
                     vbox_vram=${OPTARG}
-					 else
-					     echo "WARNING: Invalid option for vbox_vram [${OPTARG}].  Using default value of ${vbox_vram}."
-					 fi ;;
-				\? ) 
-				    echo "Invalid option provided!"
-				    printUsage
-				    exit 1 ;;
+                else
+                    echo "WARNING: Invalid option for vbox_vram [${OPTARG}].  Using default value of ${vbox_vram}."
+                fi ;;
+            \? ) 
+                echo "Invalid option provided!"
+                printUsage
+                exit 1 ;;
         esac
     done
 }
