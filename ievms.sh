@@ -63,6 +63,13 @@ install_unrar() {
     esac
 }
 
+install_cabextract() {
+    case $kernel in
+        Darwin) download_cabextract ;;
+        Linux) fail "Linux support requires cabextract (sudo apt-get install for Ubuntu/Debian)" ;;
+    esac
+}
+
 download_unrar() {
     url="http://www.rarlab.com/rar/rarosx-4.0.1.tar.gz"
     archive="rar.tar.gz"
@@ -82,17 +89,48 @@ download_unrar() {
     hash unrar 2>&- || fail "Could not find unrar in ${ievms_home}/rar/"
 }
 
+download_cabextract() {
+    url="http://rudix.googlecode.com/files/cabextract-1.4-3.pkg"
+    archive="cabextract.pkg"
+
+    log "Downloading cabextract from ${url} to ${ievms_home}/${archive}"
+    if ! curl ${curl_opts} -C - -L "${url}" -o "${archive}"
+    then
+        fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
+    fi
+
+    mkdir -p "${ievms_home}/cabextract"
+    if ! xar -xf "${archive}" -C "${ievms_home}/cabextract"
+    then
+        fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/cabextract," \
+            "xar command returned error code $?"
+    fi
+
+    cd "${ievms_home}/cabextract/cabextractinstall.pkg"
+    gzcat Payload | cpio -i --quiet
+    cd "${ievms_home}"
+    hash cabextract 2>&- || fail "Could not find cabextract in ${ievms_home}/cabextract/cabextractinstall.pkg/usr/local/bin"
+}
+
 check_unrar() {
     PATH="${PATH}:${ievms_home}/rar"
     hash unrar 2>&- || install_unrar
 }
 
+check_cabextract() {
+    PATH="${PATH}:${ievms_home}/cabextract/cabextractinstall.pkg/usr/local/bin"
+    hash cabextract 2>&- || install_cabextract
+}
+
 build_ievm() {
+    extract_cmd="unrar e -y"
+
     case $1 in
         6) 
             urls="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_XP_IE6.exe"
             vhd="Windows XP.vhd"
             vm_type="WindowsXP"
+            extract_cmd="cabextract"
             ;;
         7) 
             urls=`echo http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_Vista_IE7.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar}`
@@ -137,7 +175,7 @@ build_ievm() {
         rm -f "${vhd_path}/"*.vmc
 
         log "Extracting VHD from ${vhd_path}/${archive}"
-        if ! unrar e -y "${archive}"
+        if ! ${extract_cmd} "${archive}"
         then
             fail "Failed to extract ${archive} to ${vhd_path}/${vhd}," \
                 "unrar command returned error code $?"
@@ -227,6 +265,7 @@ check_system
 create_home
 check_virtualbox
 check_unrar
+check_cabextract
 
 all_versions="6 7 8 9"
 for ver in ${IEVMS_VERSIONS:-$all_versions}
