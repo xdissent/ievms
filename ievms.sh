@@ -166,7 +166,7 @@ build_ievm() {
         do
             archive=`basename $url`
             log "Downloading VHD from ${url} to ${ievms_home}/"
-            if ! curl ${curl_opts} -C - -L -O "${url}"
+            if ! curl ${curl_opts} --retry 10 -C - -L -O "${url}"
             then
                 fail "Failed to download ${url} to ${vhd_path}/ using 'curl', error code ($?)"
             fi
