@@ -20,6 +20,19 @@ create_home() {
     cd "${ievms_home}"
 }
 
+check_mkisofs() {
+
+    if which mkisofs > /dev/null
+    then
+        mkisofs_cmd=`which mkisofs`
+    elif which genisoimage > /dev/null
+    then
+        mkisofs_cmd=`which genisoimage`
+    else
+        fail "Sorry, The cdrtools is not installed (or in your path)"
+    fi
+}
+
 check_system() {
     # Check for supported system
     kernel=`uname -s`
@@ -126,23 +139,23 @@ build_ievm() {
     extract_cmd="unrar e -y"
 
     case $1 in
-        6) 
+        6)
             urls="http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_XP_IE6.exe"
             vhd="Windows XP.vhd"
             vm_type="WindowsXP"
             extract_cmd="cabextract"
             ;;
-        7) 
+        7)
             urls=`echo http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_Vista_IE7.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar}`
             vhd="Windows Vista.vhd"
             vm_type="WindowsVista"
             ;;
-        8) 
+        8)
             urls=`echo http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_7_IE8.part0{1.exe,2.rar,3.rar,4.rar}`
             vhd="Win7_IE8.vhd"
             vm_type="Windows7"
             ;;
-        9) 
+        9)
             urls=`echo http://download.microsoft.com/download/B/7/2/B72085AE-0F04-4C6F-9182-BF1EE90F5273/Windows_7_IE9.part0{1.exe,2.rar,3.rar,4.rar,5.rar,6.rar,7.rar}`
             vhd="Windows 7.vhd"
             vm_type="Windows7"
@@ -251,10 +264,10 @@ build_and_attach_drivers() {
     then
       log "Writing drivers ISO"
 
-      
+
       case $kernel in
           Darwin) hdiutil makehybrid "${ievms_home}/drivers" -o "${ievms_home}/drivers.iso" ;;
-          Linux) mkisofs -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
+          Linux) ${mkisofs_cmd} -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
       esac
     fi
 
@@ -263,6 +276,7 @@ build_and_attach_drivers() {
 
 check_system
 create_home
+check_mkisofs
 check_virtualbox
 check_unrar
 check_cabextract
