@@ -199,7 +199,12 @@ build_ievm() {
         VBoxManage storagectl "${vm}" --name "Floppy Controller" --add floppy
         VBoxManage internalcommands sethduuid "${vhd_path}/${vhd}"
         VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium "${vhd_path}/${vhd}"
+        if [ -f "${ga_iso}" ] 
+        then
         VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium "${ga_iso}"
+        else
+            echo "*** Warning : VirtualBox guest additions not found in ${ga_iso}, not installed ***"
+        fi
         VBoxManage storageattach "${vm}" --storagectl "Floppy Controller" --port 0 --device 0 --type fdd --medium emptydrive
         declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
