@@ -33,6 +33,13 @@ check_virtualbox() {
     log "Checking for VirtualBox"
     hash VBoxManage 2>&- || fail "VirtualBox is not installed! (http://virtualbox.org)"
 
+    log "Checking for VirtualBox Guest Additions"
+    case $kernel in
+        Darwin) ga_iso="/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso" ;;
+        Linux) ga_iso="/usr/share/virtualbox/VBoxGuestAdditions.iso" ;;
+    esac
+    [ -e "$ga_iso" ] || fail "VirtualBox Guest Additions are not installed! (http://virtualbox.org)"
+
     log "Checking for Oracle VM VirtualBox Extension Pack"
     if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
     then
