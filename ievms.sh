@@ -39,6 +39,8 @@ check_virtualbox() {
         version=`VBoxManage -v`
         ext_version="${version/r/-}"
         short_version="${version/r*/}"
+        ext_version="${ext_version/_OSE/}"
+        short_version="${short_version/_OSE/}"
         url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
         archive="Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
 
