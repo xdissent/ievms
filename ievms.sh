@@ -215,11 +215,11 @@ build_ievm() {
 
         if [[ ! -f "${ga_iso}" ]]
         then
+            check_version
             ga_iso="${ievms_home}/VBoxGuestAdditions_${major_minor_release}.iso"
 
             if [[ ! -f "${ga_iso}" ]]
             then
-                check_version
                 url="http://download.virtualbox.org/virtualbox/${major_minor_release}/VBoxGuestAdditions_${major_minor_release}.iso"
                 log "Downloading Virtualbox Guest Additions ISO from ${url} to ${ga_iso}"
                 if ! curl ${curl_opts} -L "${url}" -o "${ga_iso}"
