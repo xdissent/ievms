@@ -32,20 +32,39 @@ check_system() {
 check_virtualbox() {
     log "Checking for VirtualBox"
     hash VBoxManage 2>&- || fail "VirtualBox is not installed! (http://virtualbox.org)"
+}
 
+check_ext_pack() {
     log "Checking for Oracle VM VirtualBox Extension Pack"
     if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
     then
         version=`VBoxManage -v`
-        ext_version="${version/r/-}"
-        short_version="${version/r*/}"
-        url="http://download.virtualbox.org/virtualbox/${short_version}/Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
-        archive="Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
+        ext_version="${version%%[-_r]*}"
+        ext_major_minor="${version%.*}"
+        dl_page=`curl ${curl_opts} -L "http://download.virtualbox.org/virtualbox/" 2>/dev/null`
 
-        log "Downloading Oracle VM VirtualBox Extension Pack from ${url} to ${ievms_home}/${archive}"
-        if ! curl ${curl_opts} -C - -L "${url}" -o "${archive}"
+        for (( ext_release="${ext_version#*.*.}"; ext_release >= 0; ext_release-- ))
+        do
+            ext_version="${ext_major_minor}.${ext_release}"
+            if echo $dl_page | grep "${ext_version}" &>/dev/null
+            then
+                log "Extension pack version ${ext_version} found."
+                break
+            else
+                log "Extension pack version ${ext_version} not found - skipping."
+            fi
+        done
+
+        archive="Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
+        url="http://download.virtualbox.org/virtualbox/${ext_version}/${archive}"
+
+        if [[ ! -f "${archive}" ]]
         then
-            fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
+            log "Downloading Oracle VM VirtualBox Extension Pack from ${url} to ${ievms_home}/${archive}"
+            if ! curl ${curl_opts} -L "${url}" -o "${archive}"
+            then
+                fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
+            fi
         fi
 
         log "Installing Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}"
@@ -264,6 +283,7 @@ build_and_attach_drivers() {
 check_system
 create_home
 check_virtualbox
+check_ext_pack
 check_unrar
 check_cabextract
 
