@@ -215,7 +215,7 @@ build_ievm() {
 
         if [[ ! -f "${ga_iso}" ]]
         then
-            ga_iso="${ievms_home}/VBoxGuestAdditions.iso"
+            ga_iso="${ievms_home}/VBoxGuestAdditions_${major_minor_release}.iso"
 
             if [[ ! -f "${ga_iso}" ]]
             then
