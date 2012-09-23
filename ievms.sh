@@ -34,29 +34,32 @@ check_virtualbox() {
     hash VBoxManage 2>&- || fail "VirtualBox is not installed! (http://virtualbox.org)"
 }
 
+check_version() {
+    version=`VBoxManage -v`
+    major_minor_release="${version%%[-_r]*}"
+    major_minor="${version%.*}"
+    dl_page=`curl ${curl_opts} -L "http://download.virtualbox.org/virtualbox/" 2>/dev/null`
+
+    for (( release="${major_minor_release#*.*.}"; release >= 0; release-- ))
+    do
+        major_minor_release="${major_minor}.${release}"
+        if echo $dl_page | grep "${major_minor_release}/" &>/dev/null
+        then
+            log "Virtualbox version ${major_minor_release} found."
+            break
+        else
+            log "Virtualbox version ${major_minor_release} not found - skipping."
+        fi
+    done
+}
+
 check_ext_pack() {
     log "Checking for Oracle VM VirtualBox Extension Pack"
     if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
     then
-        version=`VBoxManage -v`
-        ext_version="${version%%[-_r]*}"
-        ext_major_minor="${version%.*}"
-        dl_page=`curl ${curl_opts} -L "http://download.virtualbox.org/virtualbox/" 2>/dev/null`
-
-        for (( ext_release="${ext_version#*.*.}"; ext_release >= 0; ext_release-- ))
-        do
-            ext_version="${ext_major_minor}.${ext_release}"
-            if echo $dl_page | grep "${ext_version}" &>/dev/null
-            then
-                log "Extension pack version ${ext_version} found."
-                break
-            else
-                log "Extension pack version ${ext_version} not found - skipping."
-            fi
-        done
-
-        archive="Oracle_VM_VirtualBox_Extension_Pack-${ext_version}.vbox-extpack"
-        url="http://download.virtualbox.org/virtualbox/${ext_version}/${archive}"
+        check_version
+        archive="Oracle_VM_VirtualBox_Extension_Pack-${major_minor_release}.vbox-extpack"
+        url="http://download.virtualbox.org/virtualbox/${major_minor_release}/${archive}"
 
         if [[ ! -f "${archive}" ]]
         then
@@ -209,6 +212,19 @@ build_ievm() {
             Darwin) ga_iso="/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso" ;;
             Linux) ga_iso="/usr/share/virtualbox/VBoxGuestAdditions.iso" ;;
         esac
+
+        if [[ ! -f "${ga_iso}" ]]
+        then
+            check_version
+            url="http://download.virtualbox.org/virtualbox/${major_minor_release}/VBoxGuestAdditions_${major_minor_release}.iso"
+            ga_iso="${ievms_home}/VBoxGuestAdditions.iso"
+                log "Downloading Virtualbox Guest Additions ISO from ${url} to ${ga_iso}"
+                if ! curl ${curl_opts} -L "${url}" -o "${ga_iso}"
+                then
+                    fail "Failed to download ${url} to ${ga_iso} using 'curl', error code ($?)"
+                fi
+            fi
+        fi
 
         log "Creating ${vm} VM"
         VBoxManage createvm --name "${vm}" --ostype "${vm_type}" --register
