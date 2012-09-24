@@ -231,7 +231,7 @@ build_ievm() {
 
         log "Creating ${vm} VM"
         VBoxManage createvm --name "${vm}" --ostype "${vm_type}" --register
-        VBoxManage modifyvm "${vm}" --memory 256 --vram 32
+        VBoxManage modifyvm "${vm}" --memory ${vbox_memory} --vram ${vbox_vram}
         VBoxManage storagectl "${vm}" --name "IDE Controller" --add ide --controller PIIX4 --bootable on
         VBoxManage storagectl "${vm}" --name "Floppy Controller" --add floppy
         VBoxManage internalcommands sethduuid "${vhd_path}/${vhd}"
@@ -299,6 +299,38 @@ build_and_attach_drivers() {
     VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium "${ievms_home}/drivers.iso"
 }
 
+parse_options() {
+    while getopts ":m:v:" opt; do
+        case $opt in
+            m ) 
+                if [[ ${OPTARG} =~ ^[0-9]+$ ]]; then
+                    vbox_memory=${OPTARG}
+                else
+                    echo "WARNING: Invalid option for vbox_memory [${OPTARG}].  Using default value of ${vbox_memory}."
+                fi ;;
+            v ) 
+                if [[ ${OPTARG} =~ ^[0-9]+$ ]]; then
+                    vbox_vram=${OPTARG}
+                else
+                    echo "WARNING: Invalid option for vbox_vram [${OPTARG}].  Using default value of ${vbox_vram}."
+                fi ;;
+            \? ) 
+                echo "Invalid option provided!"
+                printUsage
+                exit 1 ;;
+        esac
+    done
+}
+
+printUsage() {
+    echo "Usage:"
+    echo "`basename $0` [-m vbox_memory] [-v vbox_vram]"
+}
+
+vbox_memory=256
+vbox_vram=32
+
+parse_options "$@"
 check_system
 create_home
 check_virtualbox
