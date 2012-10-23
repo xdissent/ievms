@@ -121,8 +121,7 @@ download_cabextract() {
         fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
     fi
 
-    mkdir -p "${ievms_home}/cabextract"
-    if ! xar -xf "${archive}" -C "${ievms_home}/cabextract"
+    if ! pkgutil --expand "${archive}" "${ievms_home}/cabextract"
     then
         fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/cabextract," \
             "xar command returned error code $?"
