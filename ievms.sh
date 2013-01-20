@@ -31,7 +31,7 @@ check_system() {
 
 check_virtualbox() {
     log "Checking for VirtualBox"
-    hash VBoxManage 2>&- || fail "VirtualBox is not installed! (http://virtualbox.org)"
+    hash VBoxManage 2>&- || fail "VirtualBox command line utilities are not installed, please reinstall! (http://virtualbox.org)"
 }
 
 check_version() {
