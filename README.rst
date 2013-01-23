@@ -25,7 +25,7 @@ Requirements
 Installation
 ============
 
-1. Install VirtualBox.
+1. Install VirtualBox (make sure command line utilities are selected and installed).
 
 2. Download and unpack ievms:
 
