@@ -19,6 +19,7 @@ Requirements
 * VirtualBox (http://virtualbox.org)
 * Curl (Ubuntu: ``sudo apt-get install curl``)
 * Linux Only: unrar (Ubuntu: ``sudo apt-get install unrar``)
+* FreeBSD Only: ftp/curl, sysutils/cdrtools, archivers/cabextract, archivers/unrar, sysutils/gksu
 * Patience
 
 
