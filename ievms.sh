@@ -24,7 +24,7 @@ check_system() {
     # Check for supported system
     kernel=`uname -s`
     case $kernel in
-        Darwin|Linux) ;;
+        Darwin|Linux|FreeBSD) ;;
         *) fail "Sorry, $kernel is not supported." ;;
     esac
 }
@@ -82,6 +82,7 @@ install_unrar() {
     case $kernel in
         Darwin) download_unrar ;;
         Linux) fail "Linux support requires unrar (sudo apt-get install for Ubuntu/Debian)" ;;
+        FreeBSD) fail "FreeBSD support requires unrar (cd /usr/ports/archivers/unrar && make install clean)" ;;
     esac
 }
 
@@ -89,6 +90,7 @@ install_cabextract() {
     case $kernel in
         Darwin) download_cabextract ;;
         Linux) fail "Linux support requires cabextract (sudo apt-get install for Ubuntu/Debian)" ;;
+        FreeBSD) fail "FreeBSD support requires cabextract (cd /usr/ports/archivers/cabextract && make install clean)" ;;
     esac
 }
 
@@ -211,6 +213,7 @@ build_ievm() {
         case $kernel in
             Darwin) ga_iso="/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso" ;;
             Linux) ga_iso="/usr/share/virtualbox/VBoxGuestAdditions.iso" ;;
+            FreeBSD) ga_iso="/usr/local/lib/virtualbox/additions/VBoxGuestAdditions.iso" ;;
         esac
 
         if [[ ! -f "${ga_iso}" ]]
@@ -292,7 +295,7 @@ build_and_attach_drivers() {
       
       case $kernel in
           Darwin) hdiutil makehybrid "${ievms_home}/drivers" -o "${ievms_home}/drivers.iso" ;;
-          Linux) mkisofs -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
+          Linux|FreeBSD) mkisofs -o "${ievms_home}/drivers.iso" "${ievms_home}/drivers" ;;
       esac
     fi
 
@@ -302,7 +305,12 @@ build_and_attach_drivers() {
 check_system
 create_home
 check_virtualbox
-check_ext_pack
+
+# The extension pack is not supported on FreeBSD
+case $kernel in
+    Darwin|Linux) check_ext_pack ;;
+esac
+
 check_unrar
 check_cabextract
 
