@@ -40,6 +40,10 @@ check_version() {
     major_minor="${version%.*}"
     dl_page=`curl ${curl_opts} -L "http://download.virtualbox.org/virtualbox/" 2>/dev/null`
 
+    if [[ "$version" == *"kernel module is not loaded"* ]]; then
+        fail "$version"
+    fi
+
     for (( release="${major_minor_release#*.*.}"; release >= 0; release-- ))
     do
         major_minor_release="${major_minor}.${release}"
