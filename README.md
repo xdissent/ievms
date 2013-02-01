@@ -3,10 +3,14 @@ Overview
 
 Microsoft provides virtual machine disk images to facilitate website testing 
 in multiple versions of IE, regardless of the host operating system. 
-Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
+~~Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
 can be extremely difficult. The ievms scripts aim to facilitate that process using
-VirtualBox on Linux or OS X. With a single command, you can have IE6, IE7, IE8
-and IE9 running in separate virtual machines.
+VirtualBox on Linux or OS X.~~ With a single command, you can have IE6, IE7, IE8,
+IE9 and IE10 running in separate virtual machines. 
+
+**NOTE:** As of Feb. 1st, 2013, the [MS images](http://www.modern.ie/virtualization-tools)
+are fully compatible with Virtualbox, thanks to the [modern.IE](http://modern.IE)
+project.
 
 [![Click here to lend your support to ievms and make a donation at pledgie.com!](http://pledgie.com/campaigns/15995.png?skin_name=chrome)](http://pledgie.com/campaigns/15995)
 
@@ -16,7 +20,7 @@ Requirements
 
 * VirtualBox (http://virtualbox.org)
 * Curl (Ubuntu: `sudo apt-get install curl`)
-* Linux Only: unrar (Ubuntu: `sudo apt-get install unrar`)
+* Linux Only: unzip (Ubuntu: `sudo apt-get install unzip`)
 * Patience
 
 
@@ -27,7 +31,7 @@ Installation
 
 2. Download and unpack ievms:
 
-   * Install IE versions 6, 7, 8 and 9.
+   * Install IE versions 6, 7, 8, 9 and 10.
 
         curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
 
@@ -39,25 +43,15 @@ Installation
 
 4. Choose ievms image from Virtual Box.
 
-5. Install VirtualBox Guest Additions (pre-mounted as CD image in the VM).
-
-6. **IE6 only** - Do *not* attempt to activate upon first boot. Install the network adapter driver and KB2592799 hotfix by opening the `drivers` CD image in the VM (`Start -> My Computer -> drivers (E:)`). The network driver installer and hotfix installer will launch automatically. You must restart the VM after *both* installers have completed to enable networking. Video walkthrough of IE6 post-installation setup: http://www.youtube.com/watch?v=f6UqRteCCEs
-
-    **NOTE:** The IE6 network drivers and hotfix *must* be installed upon first boot, or an
-    activation loop will prevent subsequent logins forever. If this happens, 
-    restoring to the `clean` snapshot will reset the activation lock.
-
-The VHD archives are massive and can take hours or tens of minutes to 
+The OVA images are massive and can take hours or tens of minutes to 
 download, depending on the speed of your internet connection. You might want
 to start the install and then go catch a movie, or maybe dinner, or both. 
-
-Once available and started in VirtualBox, the password for ALL VMs is "Password1".
 
 
 Recovering from a failed installation
 -------------------------------------
 
-Each version is installed into a subdirectory of `~/.ievms/vhd/`. If the installation fails
+Each version is installed into a subdirectory of `~/.ievms/ova/`. If the installation fails
 for any reason (corrupted download, for instance), delete the version-specific subdirectory
 and rerun the install.
 
@@ -92,12 +86,6 @@ pristine virtual environment configuration. Anything can go wrong in
 Windows and rather than having to worry about maintaining a stable VM,
 you can simply revert to the `clean` snapshot to reset your VM to the
 initial state.
-
-The VMs provided by Microsoft will not pass the Windows Genuine Advantage
-and cannot be activated. Unfortunately for us, that means our VMs will
-lock us out after 30 days of unactivated use. By reverting to the 
-`clean` snapshot the countdown to the activation apocalypse is reset,
-effectively allowing your VM to work indefinitely.
 
 
 Resuming Downloads
