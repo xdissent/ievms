@@ -250,18 +250,27 @@ build_ievm() {
 
 build_ievm_ie6() {
     log "Setting up ${vm} VM"
+    
+    if [[ ! -f "${ievms_home}/drivers/WindowsXP-KB2592799-x86-ENU.exe" ]]
+    then
+        download_driver "http://download.microsoft.com/download/4/F/4/4F49D797-3D62-43B2-ADC5-78EEE96AE740/WindowsXP-KB2592799-x86-ENU.exe" "Downloading KB2592799 hotfix"
+    fi
 
     if [[ ! -f "${ievms_home}/drivers/PRO2KXP.exe" ]]
     then
         download_driver "http://downloadmirror.intel.com/8659/eng/PRO2KXP.exe" "Downloading 82540EM network adapter driver"
+    fi
 
-        if [[ ! -f "${ievms_home}/drivers/autorun.inf" ]]
-        then
-            cd "${ievms_home}/drivers"
-            echo '[autorun]' > autorun.inf
-            echo 'open=PRO2KXP.exe' >> autorun.inf
-            cd "${ievms_home}"
-        fi
+    if [[ ! -f "${ievms_home}/drivers/autorun.inf" ]]
+    then
+        cd "${ievms_home}/drivers"
+        echo '[autorun]' > autorun.inf
+        echo 'open=autorun.bat' >> autorun.inf
+        echo '@echo off' > autorun.bat
+        echo 'start PRO2KXP.exe' >> autorun.bat
+        echo 'start WindowsXP-KB2592799-x86-ENU.exe' >> autorun.bat
+        echo 'exit' >> autorun.bat
+        cd "${ievms_home}"
     fi
 
     log "Changing network adapter to 82540EM"
