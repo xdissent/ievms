@@ -32,10 +32,14 @@
 
 <p>Microsoft provides virtual machine disk images to facilitate website testing 
 in multiple versions of IE, regardless of the host operating system. 
-Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
+<del>Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
 can be extremely difficult. The ievms scripts aim to facilitate that process using
-VirtualBox on Linux or OS X. With a single command, you can have IE6, IE7, IE8
-and IE9 running in separate virtual machines.</p>
+VirtualBox on Linux or OS X.</del> With a single command, you can have IE6, IE7, IE8,
+IE9 and IE10 running in separate virtual machines. </p>
+
+<p><strong>NOTE:</strong> As of Feb. 1st, 2013, the <a href="http://www.modern.ie/virtualization-tools">MS images</a>
+are fully compatible with Virtualbox, thanks to the <a href="http://modern.IE">modern.IE</a>
+project.</p>
 
 <p><a href="http://pledgie.com/campaigns/15995"><img src="http://pledgie.com/campaigns/15995.png?skin_name=chrome" alt="Click here to lend your support to ievms and make a donation at pledgie.com!"></a></p>
 
@@ -44,7 +48,7 @@ and IE9 running in separate virtual machines.</p>
 <ul>
 <li>VirtualBox (<a href="http://virtualbox.org">http://virtualbox.org</a>)</li>
 <li>Curl (Ubuntu: <code>sudo apt-get install curl</code>)</li>
-<li>Linux Only: unrar (Ubuntu: <code>sudo apt-get install unrar</code>)</li>
+<li>Linux Only: unzip (Ubuntu: <code>sudo apt-get install unzip</code>)</li>
 <li>Patience</li>
 </ul><h1>Installation</h1>
 
@@ -53,7 +57,7 @@ and IE9 running in separate virtual machines.</p>
 <li><p>Download and unpack ievms:</p></li>
 </ol><ul>
 <li>
-<p>Install IE versions 6, 7, 8 and 9.</p>
+<p>Install IE versions 6, 7, 8, 9 and 10.</p>
 
 <pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
 </code></pre>
@@ -67,23 +71,13 @@ and IE9 running in separate virtual machines.</p>
 </ul><ol>
 <li><p>Launch Virtual Box.</p></li>
 <li><p>Choose ievms image from Virtual Box.</p></li>
-<li><p>Install VirtualBox Guest Additions (pre-mounted as CD image in the VM).</p></li>
-<li>
-<p><strong>IE6 only</strong> - Do <em>not</em> attempt to activate upon first boot. Install the network adapter driver and KB2592799 hotfix by opening the <code>drivers</code> CD image in the VM (<code>Start -&gt; My Computer -&gt; drivers (E:)</code>). The network driver installer and hotfix installer will launch automatically. You must restart the VM after <em>both</em> installers have completed to enable networking. Video walkthrough of IE6 post-installation setup: <a href="http://www.youtube.com/watch?v=f6UqRteCCEs">http://www.youtube.com/watch?v=f6UqRteCCEs</a></p>
-
-<p><strong>NOTE:</strong> The IE6 network drivers and hotfix <em>must</em> be installed upon first boot, or an
-activation loop will prevent subsequent logins forever. If this happens, 
-restoring to the <code>clean</code> snapshot will reset the activation lock.</p>
-</li>
-</ol><p>The VHD archives are massive and can take hours or tens of minutes to 
+</ol><p>The OVA images are massive and can take hours or tens of minutes to 
 download, depending on the speed of your internet connection. You might want
 to start the install and then go catch a movie, or maybe dinner, or both. </p>
 
-<p>Once available and started in VirtualBox, the password for ALL VMs is "Password1".</p>
-
 <h2>Recovering from a failed installation</h2>
 
-<p>Each version is installed into a subdirectory of <code>~/.ievms/vhd/</code>. If the installation fails
+<p>Each version is installed into a subdirectory of <code>~/.ievms/ova/</code>. If the installation fails
 for any reason (corrupted download, for instance), delete the version-specific subdirectory
 and rerun the install.</p>
 
@@ -113,12 +107,6 @@ pristine virtual environment configuration. Anything can go wrong in
 Windows and rather than having to worry about maintaining a stable VM,
 you can simply revert to the <code>clean</code> snapshot to reset your VM to the
 initial state.</p>
-
-<p>The VMs provided by Microsoft will not pass the Windows Genuine Advantage
-and cannot be activated. Unfortunately for us, that means our VMs will
-lock us out after 30 days of unactivated use. By reverting to the 
-<code>clean</code> snapshot the countdown to the activation apocalypse is reset,
-effectively allowing your VM to work indefinitely.</p>
 
 <h2>Resuming Downloads</h2>
 
