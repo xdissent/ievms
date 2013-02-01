@@ -43,9 +43,9 @@ Installation
 
 5. Install VirtualBox Guest Additions (pre-mounted as CD image in the VM).
 
-6. **IE6 only** - Install network adapter drivers by opening the ``drivers`` CD image in the VM.
+6. **IE6 only** - Do *not* attempt to activate upon first boot. Install the network adapter drivers and KB2592799 hotfix by opening the ``drivers`` CD image in the VM (``Start -> My Computer -> drivers (E:)``). The network driver installer and hotfix installer will launch automatically. You must restart the VM after *both* installers have completed to enable networking. Video walkthrough of IE6 post-installation setup: http://www.youtube.com/watch?v=f6UqRteCCEs
 
-.. note:: The IE6 network drivers *must* be installed upon first boot, or an
+.. note:: The IE6 network drivers and hotfix *must* be installed upon first boot, or an
    activation loop will prevent subsequent logins forever. If this happens, 
    restoring to the ``clean`` snapshot will reset the activation lock.
 
