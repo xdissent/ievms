@@ -17,7 +17,10 @@
       <header>
         <h1>ievms</h1>
         <p>Automated installation of the Microsoft IE App Compat virtual machines</p>
+
         <p class="view"><a href="https://github.com/xdissent/ievms">View the Project on GitHub <small>xdissent/ievms</small></a></p>
+
+
         <ul>
           <li><a href="https://github.com/xdissent/ievms/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/xdissent/ievms/tarball/master">Download <strong>TAR Ball</strong></a></li>
@@ -46,7 +49,7 @@ and IE9 running in separate virtual machines.</p>
 </ul><h1>Installation</h1>
 
 <ol>
-<li><p>Install VirtualBox.</p></li>
+<li><p>Install VirtualBox (make sure command line utilities are selected and installed).</p></li>
 <li><p>Download and unpack ievms:</p></li>
 </ol><ul>
 <li>
@@ -66,9 +69,9 @@ and IE9 running in separate virtual machines.</p>
 <li><p>Choose ievms image from Virtual Box.</p></li>
 <li><p>Install VirtualBox Guest Additions (pre-mounted as CD image in the VM).</p></li>
 <li>
-<p><strong>IE6 only</strong> - Install network adapter drivers by opening the <code>drivers</code> CD image in the VM.</p>
+<p><strong>IE6 only</strong> - Do <em>not</em> attempt to activate upon first boot. Install the network adapter driver and KB2592799 hotfix by opening the <code>drivers</code> CD image in the VM (<code>Start -&gt; My Computer -&gt; drivers (E:)</code>). The network driver installer and hotfix installer will launch automatically. You must restart the VM after <em>both</em> installers have completed to enable networking. Video walkthrough of IE6 post-installation setup: <a href="http://www.youtube.com/watch?v=f6UqRteCCEs">http://www.youtube.com/watch?v=f6UqRteCCEs</a></p>
 
-<p><strong>NOTE:</strong> The IE6 network drivers <em>must</em> be installed upon first boot, or an
+<p><strong>NOTE:</strong> The IE6 network drivers and hotfix <em>must</em> be installed upon first boot, or an
 activation loop will prevent subsequent logins forever. If this happens, 
 restoring to the <code>clean</code> snapshot will reset the activation lock.</p>
 </li>
