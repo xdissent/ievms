@@ -109,7 +109,7 @@ check_unar() {
     if [ "${kernel}" == "Darwin" ]
     then
         PATH="${PATH}:${ievms_home}"
-        hash unar 2>&- || install_unar
+        hash unar 2>&- || download_unar
     else
         hash unzip 2>&- || fail "Linux support requires unzip (sudo apt-get install for Ubuntu/Debian)"
     fi
