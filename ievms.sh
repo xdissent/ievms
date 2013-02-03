@@ -128,7 +128,7 @@ build_ievm() {
             fi
             ;;
         9) os="Win7" ; unit="11" ;;
-        10) os="Win8" ;;
+        10) os="Win8" ; unit="11" ;;
         *) fail "Invalid IE version: ${1}" ;;
     esac
 
