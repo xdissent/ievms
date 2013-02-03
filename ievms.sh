@@ -118,12 +118,12 @@ check_unar() {
 build_ievm() {
     case $1 in
         6|7|8)
+            os="WinXP"
             if [ "${reuse_xp}" != "yes" ]
             then
                 if [ "$1" == "7" ]; then os="Vista"; fi
                 if [ "$1" == "8" ]; then os="Win7"; fi
             else
-                os="WinXP"
                 archive="IE6_WinXP.zip"
                 unit="10"
             fi
@@ -236,10 +236,12 @@ build_ievm_xp() {
 }
 
 build_ievm_ie7() {
+    if [ "${reuse_xp}" != "yes" ]; then return; fi
     build_ievm_xp 7 "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe"
 }
 
 build_ievm_ie8() {
+    if [ "${reuse_xp}" != "yes" ]; then return; fi
     build_ievm_xp 8 "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe"
 }
 
