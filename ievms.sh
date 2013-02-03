@@ -117,25 +117,26 @@ check_unar() {
 
 build_ievm() {
     case $1 in
-        6) os="WinXP" ;;
-        7|8)
+        6|7|8)
             if [ "${reuse_xp}" != "yes" ]
             then
-                if [ "$1" == "7" ]; then os="Vista"; else os="Win7" ; fi
+                if [ "$1" == "7" ]; then os="Vista"; fi
+                if [ "$1" == "8" ]; then os="Win7"; fi
             else
                 os="WinXP"
                 archive="IE6_WinXP.zip"
+                unit="10"
             fi
             ;;
-        9) os="Win7" ; unit="11" ;;
-        10) os="Win8" ; unit="11" ;;
+        9) os="Win7" ;;
+        10) os="Win8" ;;
         *) fail "Invalid IE version: ${1}" ;;
     esac
 
     vm="IE${1} - ${os}"
     def_archive="${vm/ - /_}.zip"
     archive=${archive:-$def_archive}
-    unit=${unit:-"10"}
+    unit=${unit:-"11"}
     ova=`basename "${archive/_/ - }" .zip`.ova
     url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
     
