@@ -1,0 +1,10 @@
+#!/bin/sh
+mdev -s
+mkdir /tmp /disk
+chmod 777 /tmp
+sh /scripts/prepdriver.sh
+mdev -s
+ntfs-3g /dev/sda1 /disk -o rw,noatime
+reged -IC /disk/WINDOWS/system32/config/system HKEY_LOCAL_MACHINE\\SYSTEM /scripts/ievms.reg
+umount /disk 2>/dev/null
+poweroff
