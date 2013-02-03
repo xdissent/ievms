@@ -15,6 +15,12 @@ project.
 [![Click here to lend your support to ievms and make a donation at pledgie.com!](http://pledgie.com/campaigns/15995.png?skin_name=chrome)](http://pledgie.com/campaigns/15995)
 
 
+Quickstart
+==========
+
+Just paste this into a terminal: `curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash`
+
+
 Requirements
 ============
 
@@ -22,6 +28,58 @@ Requirements
 * Curl (Ubuntu: `sudo apt-get install curl`)
 * Linux Only: unzip (Ubuntu: `sudo apt-get install unzip`)
 * Patience
+
+
+Disk requirements
+-----------------
+
+A full ievms install will require approximately 37G:
+
+  Servo:.ievms xdissent$ du -ch *
+  5.7G  IE10 - Win8-disk1.vmdk
+  2.6G  IE10 - Win8.ova
+  2.5G  IE10_Win8.zip
+  1.5G  IE6 - WinXP-disk1.vmdk
+  724M  IE6 - WinXP.ova
+  717M  IE6_WinXP.zip
+  1.6G  IE7 - WinXP-disk1.vmdk
+   15M  IE7-WindowsXP-x86-enu.exe
+  1.6G  IE8 - WinXP-disk1.vmdk
+   16M  IE8-WindowsXP-x86-ENU.exe
+   10G  IE9 - Win7-disk1.vmdk
+  4.7G  IE9 - Win7.ova
+  4.7G  IE9_Win7.zip
+  3.4M  ievms-control.iso
+  4.6M  lsar
+  4.5M  unar
+  4.1M  unar1.5.zip
+   37G  total
+   
+You may remove all files except `*.vmdk` after installation and they will be
+re-downloaded if ievms is run again in the future:
+
+  $ find ~/.ievms -type f ! -name "*.vmdk" -exec rm {} \;
+
+If all installation related files are removed, around 21G is required:
+
+  Servo:.ievms xdissent$ du -ch *
+  5.7G  IE10 - Win8-disk1.vmdk
+  1.5G  IE6 - WinXP-disk1.vmdk
+  1.6G  IE7 - WinXP-disk1.vmdk
+  1.6G  IE8 - WinXP-disk1.vmdk
+   10G  IE9 - Win7-disk1.vmdk
+   21G  total
+
+
+Bandwidth requirements
+----------------------
+
+A full installation will download roughly 7.5G of data.
+
+**NOTE:** Reusing the XP VM for IE7 and IE8 (the default) saves an incredible
+amount of space and bandwidth. If it is disabled (`REUSE_XP=no`) the disk space
+required climbs to 74G (39G if cleaned post-install) and around 17G will be 
+downloaded.
 
 
 Installation
