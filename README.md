@@ -51,11 +51,11 @@ to start the install and then go catch a movie, or maybe dinner, or both.
 Recovering from a failed installation
 -------------------------------------
 
-Each version is installed into a subdirectory of `~/.ievms/ova/`. If the installation fails
-for any reason (corrupted download, for instance), delete the version-specific subdirectory
+Each version is installed into `~/.ievms/` (or `INSTALL_PATH`). If the installation fails
+for any reason (corrupted download, for instance), delete the appropriate ZIP/ova file
 and rerun the install.
 
-If nothing else, you can delete `~/.ievms` and rerun the install.
+If nothing else, you can delete `~/.ievms` (or `INSTALL_PATH`) and rerun the install.
 
 
 Specifying the install path
@@ -91,9 +91,55 @@ initial state.
 Resuming Downloads
 ------------------
 
-If one of the comically large files fails to download, the `curl` 
-command used will automatically attempt to resume where it left off. 
+~~If one of the comically large files fails to download, the `curl` 
+command used will automatically attempt to resume where it left off.~~
+Unfortunately, the modern.IE download servers do not support resume.
 
+
+Reusing XP VMs
+--------------
+
+IE7 and IE8 ship from MS on Vista and Win7 respectively. Both of these
+images are far larger than the IE6 XP image, which also technically supports
+IE7 and IE8. To save bandwidth, space and time, ievms will will reuse
+(duplicate) the IE6 XP VM image for both. Virtualbox guest control is used
+to run the appropriate IE installer within the VM. The `clean` snapshot
+includes the updated browser version.
+
+**NOTE:** If you'd like to disable XP VM reuse for IE7 and IE8, set the 
+environment variable `REUSE_XP` to anything other than `yes`:
+
+    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | REUSE_XP="no" bash
+
+
+Control ISO
+-----------
+
+Microsoft's XP image uses a blank password for the `IEUser`, which disallows
+control via Virtualbox's guest control by default. Changing a value in the
+Windows registry enables guest control, but requires accessing the VM's hard
+drive. A solution is to boot the VM with a special boot CD image which attaches
+the hard disk and edits the registry. A custom linux build has been created
+based on [the ntpasswd bootdisk](http://pogostick.net/~pnh/ntpasswd/) which
+makes the required registry edits and simply powers off the machine. The ievms
+script may then use Virtualbox guest controls to manage the VM.
+
+The control ISO is built within a [Vagrant](http://vagrantup.com) Ubuntu VM.
+If you'd like to build it yourself, clone the ievms repository, install
+Vagrant and run `vagrant up`. The base ntpasswd boot disk will be downloaded, 
+unpacked and customized within the Vagrant VM. A custom linux kernel is 
+cross-compiled for the image as well.
+
+
+Acknowledgements
+================
+
+* [modern.IE](http://modern.ie) - Provider of IE VM images.
+* [ntpasswd](http://pogostick.net/~pnh/ntpasswd/) - Boot disk starting point
+and registry editor.
+* [regit-config](https://github.com/regit/regit-config) - Minimal Virtualbox
+kernel config reference.
+* [uck](http://sourceforge.net/projects/uck/) - Used to (re)master control ISO.
 
 License
 =======
