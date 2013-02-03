@@ -87,18 +87,18 @@ check_ext_pack() {
 }
 
 download_unar() {
-    url="http://theunarchiver.googlecode.com/files/unar1.5.zip"
-    archive=`basename "${url}"`
+    unar_url="http://theunarchiver.googlecode.com/files/unar1.5.zip"
+    unar_archive=`basename "${unar_url}"`
 
-    log "Downloading unar from ${url} to ${ievms_home}/${archive}"
-    if [[ ! -f "${archive}" ]] && ! curl ${curl_opts} -L "${url}" -o "${archive}"
+    log "Downloading unar from ${unar_url} to ${ievms_home}/${unar_archive}"
+    if [[ ! -f "${unar_archive}" ]] && ! curl ${curl_opts} -L "${unar_url}" -o "${unar_archive}"
     then
-        fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
+        fail "Failed to download ${unar_url} to ${ievms_home}/${unar_archive} using 'curl', error code ($?)"
     fi
 
-    if ! unzip "${archive}"
+    if ! unzip "${unar_archive}"
     then
-        fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/," \
+        fail "Failed to extract ${ievms_home}/${unar_archive} to ${ievms_home}/," \
             "unzip command returned error code $?"
     fi
 
