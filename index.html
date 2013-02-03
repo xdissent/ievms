@@ -43,6 +43,10 @@ project.</p>
 
 <p><a href="http://pledgie.com/campaigns/15995"><img src="http://pledgie.com/campaigns/15995.png?skin_name=chrome" alt="Click here to lend your support to ievms and make a donation at pledgie.com!"></a></p>
 
+<h1>Quickstart</h1>
+
+<p>Just paste this into a terminal: <code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash</code></p>
+
 <h1>Requirements</h1>
 
 <ul>
@@ -50,7 +54,58 @@ project.</p>
 <li>Curl (Ubuntu: <code>sudo apt-get install curl</code>)</li>
 <li>Linux Only: unzip (Ubuntu: <code>sudo apt-get install unzip</code>)</li>
 <li>Patience</li>
-</ul><h1>Installation</h1>
+</ul><h2>Disk requirements</h2>
+
+<p>A full ievms install will require approximately 37G:</p>
+
+<pre><code>Servo:.ievms xdissent$ du -ch *
+5.7G  IE10 - Win8-disk1.vmdk
+2.6G  IE10 - Win8.ova
+2.5G  IE10_Win8.zip
+1.5G  IE6 - WinXP-disk1.vmdk
+724M  IE6 - WinXP.ova
+717M  IE6_WinXP.zip
+1.6G  IE7 - WinXP-disk1.vmdk
+ 15M  IE7-WindowsXP-x86-enu.exe
+1.6G  IE8 - WinXP-disk1.vmdk
+ 16M  IE8-WindowsXP-x86-ENU.exe
+ 10G  IE9 - Win7-disk1.vmdk
+4.7G  IE9 - Win7.ova
+4.7G  IE9_Win7.zip
+3.4M  ievms-control.iso
+4.6M  lsar
+4.5M  unar
+4.1M  unar1.5.zip
+ 37G  total
+</code></pre>
+
+<p>You may remove all files except <code>*.vmdk</code> after installation and they will be
+re-downloaded if ievms is run again in the future:</p>
+
+<pre><code>$ find ~/.ievms -type f ! -name "*.vmdk" -exec rm {} \;
+</code></pre>
+
+<p>If all installation related files are removed, around 21G is required:</p>
+
+<pre><code>Servo:.ievms xdissent$ du -ch *
+5.7G  IE10 - Win8-disk1.vmdk
+1.5G  IE6 - WinXP-disk1.vmdk
+1.6G  IE7 - WinXP-disk1.vmdk
+1.6G  IE8 - WinXP-disk1.vmdk
+ 10G  IE9 - Win7-disk1.vmdk
+ 21G  total
+</code></pre>
+
+<h2>Bandwidth requirements</h2>
+
+<p>A full installation will download roughly 7.5G of data.</p>
+
+<p><strong>NOTE:</strong> Reusing the XP VM for IE7 and IE8 (the default) saves an incredible
+amount of space and bandwidth. If it is disabled (<code>REUSE_XP=no</code>) the disk space
+required climbs to 74G (39G if cleaned post-install) and around 17G will be 
+downloaded.</p>
+
+<h1>Installation</h1>
 
 <ol>
 <li><p>Install VirtualBox (make sure command line utilities are selected and installed).</p></li>
@@ -77,15 +132,15 @@ to start the install and then go catch a movie, or maybe dinner, or both. </p>
 
 <h2>Recovering from a failed installation</h2>
 
-<p>Each version is installed into a subdirectory of <code>~/.ievms/ova/</code>. If the installation fails
-for any reason (corrupted download, for instance), delete the version-specific subdirectory
+<p>Each version is installed into <code>~/.ievms/</code> (or <code>INSTALL_PATH</code>). If the installation fails
+for any reason (corrupted download, for instance), delete the appropriate ZIP/ova file
 and rerun the install.</p>
 
-<p>If nothing else, you can delete <code>~/.ievms</code> and rerun the install.</p>
+<p>If nothing else, you can delete <code>~/.ievms</code> (or <code>INSTALL_PATH</code>) and rerun the install.</p>
 
 <h2>Specifying the install path</h2>
 
-<p>To specify where the VMs are installed, use the INSTALL_PATH variable:</p>
+<p>To specify where the VMs are installed, use the <code>INSTALL_PATH</code> variable:</p>
 
 <pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | INSTALL_PATH="/Path/to/.ievms" bash
 </code></pre>
@@ -110,10 +165,56 @@ initial state.</p>
 
 <h2>Resuming Downloads</h2>
 
-<p>If one of the comically large files fails to download, the <code>curl</code> 
-command used will automatically attempt to resume where it left off. </p>
+<p><del>If one of the comically large files fails to download, the <code>curl</code> 
+command used will automatically attempt to resume where it left off.</del>
+Unfortunately, the modern.IE download servers do not support resume.</p>
 
-<h1>License</h1>
+<h2>Reusing XP VMs</h2>
+
+<p>IE7 and IE8 ship from MS on Vista and Win7 respectively. Both of these
+images are far larger than the IE6 XP image, which also technically supports
+IE7 and IE8. To save bandwidth, space and time, ievms will will reuse
+(duplicate) the IE6 XP VM image for both. Virtualbox guest control is used
+to run the appropriate IE installer within the VM. The <code>clean</code> snapshot
+includes the updated browser version.</p>
+
+<p><strong>NOTE:</strong> If you'd like to disable XP VM reuse for IE7 and IE8, set the 
+environment variable <code>REUSE_XP</code> to anything other than <code>yes</code>:</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | REUSE_XP="no" bash
+</code></pre>
+
+<h2>Control ISO</h2>
+
+<p>Microsoft's XP image uses a blank password for the <code>IEUser</code>, which disallows
+control via Virtualbox's guest control by default. Changing a value in the
+Windows registry enables guest control, but requires accessing the VM's hard
+drive. A solution is to boot the VM with a special boot CD image which attaches
+the hard disk and edits the registry. A custom linux build has been created
+based on <a href="http://pogostick.net/%7Epnh/ntpasswd/">the ntpasswd bootdisk</a> which
+makes the required registry edits and simply powers off the machine. The ievms
+script may then use Virtualbox guest controls to manage the VM.</p>
+
+<p>The control ISO is built within a <a href="http://vagrantup.com">Vagrant</a> Ubuntu VM.
+If you'd like to build it yourself, clone the ievms repository, install
+Vagrant and run <code>vagrant up</code>. The base ntpasswd boot disk will be downloaded, 
+unpacked and customized within the Vagrant VM. A custom linux kernel is 
+cross-compiled for the image as well.</p>
+
+<h1>Acknowledgements</h1>
+
+<ul>
+<li>
+<a href="http://modern.ie">modern.IE</a> - Provider of IE VM images.</li>
+<li>
+<a href="http://pogostick.net/%7Epnh/ntpasswd/">ntpasswd</a> - Boot disk starting point
+and registry editor.</li>
+<li>
+<a href="https://github.com/regit/regit-config">regit-config</a> - Minimal Virtualbox
+kernel config reference.</li>
+<li>
+<a href="http://sourceforge.net/projects/uck/">uck</a> - Used to (re)master control ISO.</li>
+</ul><h1>License</h1>
 
 <p>None. (To quote Morrissey, "take it, it's yours")</p>
       </section>
