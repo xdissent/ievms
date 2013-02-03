@@ -135,13 +135,11 @@ Acknowledgements
 ================
 
 * [modern.IE](http://modern.ie) - Provider of IE VM images.
-
 * [ntpasswd](http://pogostick.net/~pnh/ntpasswd/) - Boot disk starting point
 and registry editor.
-
 * [regit-config](https://github.com/regit/regit-config) - Minimal Virtualbox
 kernel config reference.
-
+* [uck](http://sourceforge.net/projects/uck/) - Used to (re)master control ISO.
 
 License
 =======
