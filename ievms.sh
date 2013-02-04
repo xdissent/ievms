@@ -116,6 +116,8 @@ check_unar() {
 }
 
 build_ievm() {
+    unset archive
+    unset unit
     case $1 in
         6|7|8)
             os="WinXP"
