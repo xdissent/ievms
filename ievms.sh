@@ -233,6 +233,8 @@ build_ievm_xp() {
       log "Waiting for ${vm} to shutdown..."
       VBoxManage list runningvms | grep "${vm}" >/dev/null && x=$? || x=$?
     done
+
+    sleep "${sleep_wait}" # Extra sleep for good measure.
 }
 
 build_ievm_ie7() {
