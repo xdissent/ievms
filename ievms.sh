@@ -111,7 +111,7 @@ check_unar() {
         PATH="${PATH}:${ievms_home}"
         hash unar 2>&- || download_unar
     else
-        hash unzip 2>&- || fail "Linux support requires unzip (sudo apt-get install for Ubuntu/Debian)"
+        hash unar 2>&- || fail "Linux support requires unar (sudo apt-get install for Ubuntu/Debian)"
     fi
 }
 
@@ -152,11 +152,10 @@ build_ievm() {
         fi
 
         log "Extracting OVA from ${ievms_home}/${archive}"
-        if [ "${kernel}" == "Darwin" ]; then unar "${archive}" ; else unzip "${archive}" ; fi
-        if [ "$?" != "0" ]
+        if ! unar "${archive}"
         then
             fail "Failed to extract ${archive} to ${ievms_home}/${ova}," \
-                "unzip command returned error code $?"
+                "unar command returned error code $?"
         fi
     fi
 

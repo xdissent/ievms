@@ -26,7 +26,7 @@ Requirements
 
 * VirtualBox (http://virtualbox.org)
 * Curl (Ubuntu: `sudo apt-get install curl`)
-* Linux Only: unzip (Ubuntu: `sudo apt-get install unzip`)
+* Linux Only: unar (Ubuntu: `sudo apt-get install unar`)
 * Patience
 
 
