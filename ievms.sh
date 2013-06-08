@@ -6,12 +6,32 @@ set -o errtrace
 set -o errexit
 set -o pipefail
 
-curl_opts=${CURL_OPTS:-""}
+curl_opts=${CURL_OPTS:-"-L -O"}
+axel_opts=${AXEL_OPTS:-"-a"}
+agent=${FORCE_AGENT:-""}
 reuse_xp=${REUSE_XP:-"yes"}
 
 log()  { printf "$*\n" ; return $? ;  }
 
 fail() { log "\nERROR: $*\n" ; exit 1 ; }
+
+download_agent() {
+	# Check if an agent is forced. Otherwise use axel if available 
+	# and curl as a fallback.
+	if [ "$agent" == "" ]; then
+		if hash axel 2>/dev/null; then
+			agent="axel"
+			agent_opts=${axel_opts}
+		else
+			agent="curl"
+			agent_opts=${curl_opts}
+		fi
+	elif [ "$agent" == "axel" ]; then
+		agent_opts=${axel_opts}
+	else
+		agent_opts=${curl_opts}
+	fi
+}
 
 create_home() {
     def_ievms_home="${HOME}/.ievms"
@@ -42,7 +62,7 @@ check_version() {
     version=`VBoxManage -v`
     major_minor_release="${version%%[-_r]*}"
     major_minor="${version%.*}"
-    dl_page=`curl ${curl_opts} -L "http://download.virtualbox.org/virtualbox/" 2>/dev/null`
+    dl_page=`${agent} ${agent_opts} "http://download.virtualbox.org/virtualbox/" 2>/dev/null`
 
     if [[ "$version" == *"kernel module is not loaded"* ]]; then
         fail "$version"
@@ -72,9 +92,9 @@ check_ext_pack() {
         if [[ ! -f "${archive}" ]]
         then
             log "Downloading Oracle VM VirtualBox Extension Pack from ${url} to ${ievms_home}/${archive}"
-            if ! curl ${curl_opts} -L "${url}" -o "${archive}"
+            if ! ${agent} ${agent_opts} "${url}" -o "${archive}"
             then
-                fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
+                fail "Failed to download ${url} to ${ievms_home}/${archive} using '${agent}', error code ($?)"
             fi
         fi
 
@@ -91,9 +111,9 @@ download_unar() {
     unar_archive=`basename "${unar_url}"`
 
     log "Downloading unar from ${unar_url} to ${ievms_home}/${unar_archive}"
-    if [[ ! -f "${unar_archive}" ]] && ! curl ${curl_opts} -L "${unar_url}" -o "${unar_archive}"
+    if [[ ! -f "${unar_archive}" ]] && ! ${agent} ${agent_opts} "${unar_url}" -o "${unar_archive}"
     then
-        fail "Failed to download ${unar_url} to ${ievms_home}/${unar_archive} using 'curl', error code ($?)"
+        fail "Failed to download ${unar_url} to ${ievms_home}/${unar_archive} using '${agent}', error code ($?)"
     fi
 
     if ! unzip "${unar_archive}"
@@ -146,9 +166,9 @@ build_ievm() {
     if [[ ! -f "${ova}" ]]
     then
         log "Downloading OVA ZIP from ${url} to ${ievms_home}/${archive}"
-        if [[ ! -f "${archive}" ]] && ! curl ${curl_opts} -L -O "${url}"
+        if [[ ! -f "${archive}" ]] && ! ${agent} ${agent_opts} "${url}"
         then
-            fail "Failed to download ${url} to ${ievms_home}/ using 'curl', error code ($?)"
+            fail "Failed to download ${url} to ${ievms_home}/ using '${agent}', error code ($?)"
         fi
 
         log "Extracting OVA from ${ievms_home}/${archive}"
@@ -181,18 +201,18 @@ build_ievm_xp() {
     installer_host="${ievms_home}/${installer}"
     installer_guest="/Documents and Settings/IEUser/Desktop/Install IE${1}.exe"
     log "Downloading IE${1} installer from ${2}"
-    if [[ ! -f "${installer}" ]] && ! curl ${curl_opts} -L "${2}" -o "${installer}"
+    if [[ ! -f "${installer}" ]] && ! ${agent} ${agent_opts} "${2}" -o "${installer}"
     then
-        fail "Failed to download ${url} to ${ievms_home}/${installer} using 'curl', error code ($?)"
+        fail "Failed to download ${url} to ${ievms_home}/${installer} using '${agent}', error code ($?)"
     fi
 
     iso_url="https://dl.dropbox.com/u/463624/ievms-control.iso"
     dev_iso=`pwd`/ievms-control.iso # Use local iso if in ievms dev root
     if [[ -f "${dev_iso}" ]]; then iso=$dev_iso; else iso="${ievms_home}/ievms-control.iso"; fi
     log "Downloading ievms ISO from ${iso_url}"
-    if [[ ! -f "${iso}" ]] && ! curl ${curl_opts} -L "${iso_url}" -o "${iso}"
+    if [[ ! -f "${iso}" ]] && ! ${agent} ${agent_opts} "${iso_url}" -o "${iso}"
     then
-        fail "Failed to download ${iso_url} to ${ievms_home}/${iso} using 'curl', error code ($?)"
+        fail "Failed to download ${iso_url} to ${ievms_home}/${iso} using '${agent}', error code ($?)"
     fi
 
     log "Attaching ievms.iso"
@@ -248,6 +268,7 @@ build_ievm_ie8() {
     build_ievm_xp 8 "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe"
 }
 
+download_agent
 check_system
 create_home
 check_virtualbox
