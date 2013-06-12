@@ -211,11 +211,26 @@ boot_ievms() {
     VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium "${iso}"
 
     log "Starting VM ${1}"
-    VBoxManage startvm "${1}" --type headless
+    VBoxManage startvm "${1}" # --type headless
 
     wait_for_shutdown "${1}"
 
     log "Ejecting ievms.iso"
+    VBoxManage modifyvm "${1}" --dvd none
+}
+
+build_auto_ga() {
+    boot_ievms "${1}"
+
+    log "Attaching Guest Additions ISO"
+    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium additions
+
+    log "Starting VM ${1}"
+    VBoxManage startvm "${1}" # --type headless
+
+    wait_for_shutdown "${1}"
+
+    log "Ejecting Guest Additions"
     VBoxManage modifyvm "${1}" --dvd none
 }
 
@@ -253,28 +268,21 @@ build_ievm_ie6() {
 }
 
 build_ievm_ie7() {
-    if [ "${reuse_xp}" != "yes" ]; then return; fi
-    build_ievm_xp 7 "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe"
+    if [ "${reuse_xp}" != "yes" ]
+    then
+        build_auto_ga "IE7 - Vista"
+    else
+        build_ievm_xp 7 "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe"
+    fi
 }
 
 build_ievm_ie8() {
-    if [ "${reuse_xp}" != "yes" ]; then return; fi
-    build_ievm_xp 8 "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe"
-}
-
-build_auto_ga() {
-    boot_ievms "${1}"
-
-    log "Attaching Guest Additions ISO"
-    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium additions
-
-    log "Starting VM ${1}"
-    VBoxManage startvm "${1}" --type headless
-
-    wait_for_shutdown "${1}"
-
-    log "Ejecting Guest Additions"
-    VBoxManage modifyvm "${1}" --dvd none
+    if [ "${reuse_xp}" != "yes" ]
+    then
+        build_auto_ga "IE8 - Win7"
+    else
+        build_ievm_xp 8 "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe"
+    fi
 }
 
 build_ievm_ie9() {
