@@ -9,6 +9,7 @@ set -o pipefail
 curl_opts=${CURL_OPTS:-""}
 reuse_xp=${REUSE_XP:-"yes"}
 sleep_wait="10"
+orig_cwd=`pwd`
 
 log()  { printf "$*\n" ; return $? ;  }
 
@@ -195,7 +196,7 @@ wait_for_guestcontrol() {
 
 find_iso() {
     iso_url="https://dl.dropbox.com/u/463624/ievms-control.iso"
-    dev_iso=`pwd`/ievms-control.iso # Use local iso if in ievms dev root
+    dev_iso="${orig_cwd}/ievms-control.iso" # Use local iso if in ievms dev root
     if [[ -f "${dev_iso}" ]]; then iso=$dev_iso; else iso="${ievms_home}/ievms-control.iso"; fi
     log "Downloading ievms ISO from ${iso_url}"
     if [[ ! -f "${iso}" ]] && ! curl ${curl_opts} -L "${iso_url}" -o "${iso}"
