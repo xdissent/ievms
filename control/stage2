@@ -17,7 +17,7 @@ then
   cp /scripts/reuac.reg /disk/reuac.reg
 else
   ntfs-3g /dev/sda1 /disk -o rw,noatime
-  reged -IC /disk/WINDOWS/system32/config/system HKEY_LOCAL_MACHINE\\SYSTEM /scripts/ievms.reg
+  reged -IC /disk/WINDOWS/system32/config/system HKEY_LOCAL_MACHINE\\SYSTEM /scripts/xp.reg
 fi
 umount /disk 2>/dev/null
 poweroff
