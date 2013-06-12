@@ -95,7 +95,7 @@ Installation
 
    * Install specific IE versions (IE7 and IE9 only for example):
 
-        curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | IEVMS_VERSIONS="7 9" bash
+        curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9" bash
 
 3. Launch Virtual Box.
 
