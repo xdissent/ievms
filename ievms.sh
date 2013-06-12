@@ -8,6 +8,7 @@ set -o pipefail
 
 curl_opts=${CURL_OPTS:-""}
 reuse_xp=${REUSE_XP:-"yes"}
+sleep_wait="10"
 
 log()  { printf "$*\n" ; return $? ;  }
 
@@ -174,9 +175,50 @@ build_ievm() {
     fi
 }
 
-build_ievm_xp() {
-    sleep_wait="10"
+wait_for_shutdown() {
+    x="0" ; until [ "${x}" != "0" ]; do
+        log "Waiting for ${1} to shutdown..."
+        sleep "${sleep_wait}"
+        VBoxManage list runningvms | grep "${1}" >/dev/null && x=$? || x=$?
+    done
+    sleep "${sleep_wait}" # Extra sleep for good measure.
+}
 
+wait_for_guestcontrol() {
+    x="1" ; until [ "${x}" == "0" ]; do
+        log "Waiting for ${1} to be available for guestcontrol..."
+        sleep "${sleep_wait}"
+        VBoxManage guestcontrol "${1}" cp "/etc/passwd" "/" --username IEUser --dryrun && x=$? || x=$?
+    done
+    sleep "${sleep_wait}" # Extra sleep for good measure.
+}
+
+find_iso() {
+    iso_url="https://dl.dropbox.com/u/463624/ievms-control.iso"
+    dev_iso=`pwd`/ievms-control.iso # Use local iso if in ievms dev root
+    if [[ -f "${dev_iso}" ]]; then iso=$dev_iso; else iso="${ievms_home}/ievms-control.iso"; fi
+    log "Downloading ievms ISO from ${iso_url}"
+    if [[ ! -f "${iso}" ]] && ! curl ${curl_opts} -L "${iso_url}" -o "${iso}"
+    then
+        fail "Failed to download ${iso_url} to ${ievms_home}/${iso} using 'curl', error code ($?)"
+    fi
+}
+
+boot_ievms() {
+    find_iso
+    log "Attaching ievms.iso"
+    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium "${iso}"
+
+    log "Starting VM ${1}"
+    VBoxManage startvm "${1}" --type headless
+
+    wait_for_shutdown "${1}"
+
+    log "Ejecting ievms.iso"
+    VBoxManage modifyvm "${1}" --dvd none
+}
+
+build_ievm_xp() {
     installer=`basename "${2}"`
     installer_host="${ievms_home}/${installer}"
     installer_guest="/Documents and Settings/IEUser/Desktop/Install IE${1}.exe"
@@ -186,40 +228,13 @@ build_ievm_xp() {
         fail "Failed to download ${url} to ${ievms_home}/${installer} using 'curl', error code ($?)"
     fi
 
-    iso_url="https://dl.dropbox.com/u/463624/ievms-control.iso"
-    dev_iso=`pwd`/ievms-control.iso # Use local iso if in ievms dev root
-    if [[ -f "${dev_iso}" ]]; then iso=$dev_iso; else iso="${ievms_home}/ievms-control.iso"; fi
-    log "Downloading ievms ISO from ${iso_url}"
-    if [[ ! -f "${iso}" ]] && ! curl ${curl_opts} -L "${iso_url}" -o "${iso}"
-    then
-        fail "Failed to download ${iso_url} to ${ievms_home}/${iso} using 'curl', error code ($?)"
-    fi
-
-    log "Attaching ievms.iso"
-    VBoxManage storageattach "${vm}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium "${iso}"
+    boot_ievms "${vm}"
 
     log "Starting VM ${vm}"
     VBoxManage startvm "${vm}" --type headless
 
-    log "Waiting for ${vm} to shutdown..."
-    x="0" ; until [ "${x}" != "0" ]; do
-      sleep "${sleep_wait}"
-      VBoxManage list runningvms | grep "${vm}" >/dev/null && x=$? || x=$?
-    done
+    wait_for_guestcontrol "${vm}"
 
-    log "Ejecting ievms.iso"
-    VBoxManage modifyvm "${vm}" --dvd none
-
-    log "Starting VM ${vm}"
-    VBoxManage startvm "${vm}" --type headless
-
-    log "Waiting for ${vm} to be available for guestcontrol..."
-    x="1" ; until [ "${x}" == "0" ]; do
-      sleep "${sleep_wait}"
-      VBoxManage guestcontrol "${vm}" cp "${installer_host}" "${installer_guest}" --username IEUser --dryrun && x=$? || x=$?
-    done
-
-    sleep "${sleep_wait}" # Extra sleep for good measure.
     log "Copying IE${1} installer to Desktop"
     VBoxManage guestcontrol "${vm}" cp "${installer_host}" "${installer_guest}" --username IEUser
 
@@ -229,13 +244,11 @@ build_ievm_xp() {
     log "Shutting down VM ${vm}"
     VBoxManage guestcontrol "${vm}" exec --image "/WINDOWS/system32/shutdown.exe" --username IEUser --wait-exit -- -s -f -t 0
 
-    x="0" ; until [ "${x}" != "0" ]; do
-      sleep "${sleep_wait}"
-      log "Waiting for ${vm} to shutdown..."
-      VBoxManage list runningvms | grep "${vm}" >/dev/null && x=$? || x=$?
-    done
+    wait_for_shutdown "${vm}"
+}
 
-    sleep "${sleep_wait}" # Extra sleep for good measure.
+build_ievm_ie6() {
+    boot_ievms "IE6 - WinXP"
 }
 
 build_ievm_ie7() {
@@ -246,6 +259,29 @@ build_ievm_ie7() {
 build_ievm_ie8() {
     if [ "${reuse_xp}" != "yes" ]; then return; fi
     build_ievm_xp 8 "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe"
+}
+
+build_auto_ga() {
+    boot_ievms "${1}"
+
+    log "Attaching Guest Additions ISO"
+    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium additions
+
+    log "Starting VM ${1}"
+    VBoxManage startvm "${1}" --type headless
+
+    wait_for_shutdown "${1}"
+
+    log "Ejecting Guest Additions"
+    VBoxManage modifyvm "${1}" --dvd none
+}
+
+build_ievm_ie9() {
+    build_auto_ga "IE9 - Win7"
+}
+
+build_ievm_ie10() {
+    build_auto_ga "IE10 - Win8"
 }
 
 check_system
