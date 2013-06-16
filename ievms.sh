@@ -157,6 +157,14 @@ build_ievm() {
             fail "Failed to extract ${archive} to ${ievms_home}/${ova}," \
                 "unar command returned error code $?"
         fi
+
+        log "Removing the no longer necessary OVA ZIP ${ievms_home}/${archive}..."
+        if rm ${archive}
+        then
+            log "${ievms_home}/${archive} has been removed."
+        else
+            log "${ievms_home}/${archive} could not be removed (error code $?). You may try to remove it manually."
+        fi
     fi
 
     log "Checking for existing ${vm} VM"
