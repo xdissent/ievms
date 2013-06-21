@@ -36,39 +36,38 @@ Disk requirements
 A full ievms install will require approximately 37G:
 
     Servo:.ievms xdissent$ du -ch *
-    5.7G  IE10 - Win8-disk1.vmdk
-    2.6G  IE10 - Win8.ova
-    2.5G  IE10_Win8.zip
-    1.5G  IE6 - WinXP-disk1.vmdk
-    724M  IE6 - WinXP.ova
-    717M  IE6_WinXP.zip
-    1.6G  IE7 - WinXP-disk1.vmdk
-     15M  IE7-WindowsXP-x86-enu.exe
-    1.6G  IE8 - WinXP-disk1.vmdk
-     16M  IE8-WindowsXP-x86-ENU.exe
-     10G  IE9 - Win7-disk1.vmdk
-    4.7G  IE9 - Win7.ova
-    4.7G  IE9_Win7.zip
-    3.4M  ievms-control.iso
-    4.6M  lsar
-    4.5M  unar
-    4.1M  unar1.5.zip
-     37G  total
+     11G    IE10 - Win7-disk1.vmdk
+     22M    IE10-Windows6.1-x86-en-us.exe
+    1.5G    IE6 - WinXP-disk1.vmdk
+    724M    IE6 - WinXP.ova
+    717M    IE6_WinXP.zip
+    1.6G    IE7 - WinXP-disk1.vmdk
+     15M    IE7-WindowsXP-x86-enu.exe
+    1.6G    IE8 - WinXP-disk1.vmdk
+     16M    IE8-WindowsXP-x86-ENU.exe
+     11G    IE9 - Win7-disk1.vmdk
+    4.7G    IE9 - Win7.ova
+    4.7G    IE9_Win7.zip
+    3.4M    ievms-control-0.1.0.iso
+    4.6M    lsar
+    4.5M    unar
+    4.1M    unar1.5.zip
+     37G    total
    
 You may remove all files except `*.vmdk` after installation and they will be
 re-downloaded if ievms is run again in the future:
 
     $ find ~/.ievms -type f ! -name "*.vmdk" -exec rm {} \;
 
-If all installation related files are removed, around 21G is required:
+If all installation related files are removed, around 26G is required:
 
     Servo:.ievms xdissent$ du -ch *
-    5.7G  IE10 - Win8-disk1.vmdk
-    1.5G  IE6 - WinXP-disk1.vmdk
-    1.6G  IE7 - WinXP-disk1.vmdk
-    1.6G  IE8 - WinXP-disk1.vmdk
-     10G  IE9 - Win7-disk1.vmdk
-     21G  total
+     11G    IE10 - Win7-disk1.vmdk
+    1.5G    IE6 - WinXP-disk1.vmdk
+    1.6G    IE7 - WinXP-disk1.vmdk
+    1.6G    IE8 - WinXP-disk1.vmdk
+     11G    IE9 - Win7-disk1.vmdk
+     26G    total
 
 
 Bandwidth requirements
@@ -79,7 +78,9 @@ A full installation will download roughly 7.5G of data.
 **NOTE:** Reusing the XP VM for IE7 and IE8 (the default) saves an incredible
 amount of space and bandwidth. If it is disabled (`REUSE_XP=no`) the disk space
 required climbs to 74G (39G if cleaned post-install) and around 17G will be 
-downloaded.
+downloaded. Reusing the Win7 VM on the other hand (also the default), saves
+tons of bandwidth but pretty much breaks even on disk space. Disable it with 
+`REUSE_WIN7=no`.
 
 
 Installation
@@ -136,6 +137,7 @@ environment variable. For example, you can set a download speed limit:
 Features
 ========
 
+
 Clean Snapshot
 --------------
 
@@ -144,6 +146,14 @@ pristine virtual environment configuration. Anything can go wrong in
 Windows and rather than having to worry about maintaining a stable VM,
 you can simply revert to the `clean` snapshot to reset your VM to the
 initial state.
+
+
+Guest Control
+-------------
+
+VirtualBox guest additions are installed after each virtual machine is created
+(and before the clean snapshot) and the appropriate steps are taken to enable
+guest control from the host machine.
 
 
 Resuming Downloads
@@ -168,6 +178,22 @@ includes the updated browser version.
 environment variable `REUSE_XP` to anything other than `yes`:
 
     curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env REUSE_XP="no" bash
+
+
+Reusing Win7 VMs
+----------------
+
+Currently there exists a [bug](https://www.virtualbox.org/ticket/11134) in 
+VirtualBox (or possibly elsewhere) that disables guest control after a Windows 8
+virtual machine's state is saved. To better support guest control and to
+eliminate yet another image download, ievms will re-use the IE9 Win7 image for
+IE10 by default. In addition, the Win7 VMs are the only ones which can be
+successfully "rearmed" to extend the activation period.
+
+**NOTE:** If you'd like to disable Win7 VM reuse for IE10, set the environment 
+variable `REUSE_WIN7` to anything other than `yes`:
+
+    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | REUSE_WIN7="no" bash
 
 
 Control ISO
