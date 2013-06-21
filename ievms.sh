@@ -111,8 +111,7 @@ check_ext_pack() {
         local archive="Oracle_VM_VirtualBox_Extension_Pack-${major_minor_release}.vbox-extpack"
         local url="http://download.virtualbox.org/virtualbox/${major_minor_release}/${archive}"
 
-        download "Oracle VM VirtualBox Extension Pack" "${archive}" \
-            "${url}"
+        download "Oracle VM VirtualBox Extension Pack" "${url}" "${archive}"
 
         log "Installing Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}"
         VBoxManage extpack install "${archive}" || fail "Failed to install Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}, error code ($?)"
@@ -124,7 +123,7 @@ install_unar() {
     local url="http://theunarchiver.googlecode.com/files/unar1.5.zip"
     local archive=`basename "${url}"`
 
-    download "unar" "${archive}" "${url}"
+    download "unar" "${url}" "${archive}"
 
     unzip "${archive}" || fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/, unzip command returned error code $?"
 
@@ -285,6 +284,7 @@ build_ievm() {
             os="WinXP"
             if [ "${reuse_xp}" != "yes" ]
             then
+                if [ "$1" == "6" ]; then unit="10"; fi
                 if [ "$1" == "7" ]; then os="Vista"; fi
                 if [ "$1" == "8" ]; then os="Win7"; fi
             else
