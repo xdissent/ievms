@@ -26,10 +26,8 @@ else
   fi
 
   cp /scripts/reuac.reg /disk/reuac.reg
-  cp /scripts/activate.xml /disk/activate.xml
-  cp /scripts/rearm.xml /disk/rearm.xml
-  cp /scripts/boot.xml /disk/boot.xml
-  cp /scripts/boot.bat /disk/boot.bat
+  cp /scripts/ievms.xml /disk/ievms.xml
+  cp /scripts/ievms.bat /disk/ievms.bat
 fi
 umount /disk 2>/dev/null
 poweroff
