@@ -28,7 +28,8 @@
         </ul>
       </header>
       <section>
-        <h1>Overview</h1>
+        <h1>
+<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h1>
 
 <p>Microsoft provides virtual machine disk images to facilitate website testing 
 in multiple versions of IE, regardless of the host operating system. 
@@ -43,40 +44,42 @@ project.</p>
 
 <p><a href="http://pledgie.com/campaigns/15995"><img src="http://pledgie.com/campaigns/15995.png?skin_name=chrome" alt="Click here to lend your support to ievms and make a donation at pledgie.com!"></a></p>
 
-<h1>Quickstart</h1>
+<h1>
+<a name="quickstart" class="anchor" href="#quickstart"><span class="octicon octicon-link"></span></a>Quickstart</h1>
 
 <p>Just paste this into a terminal: <code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash</code></p>
 
-<h1>Requirements</h1>
+<h1>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h1>
 
 <ul>
 <li>VirtualBox (<a href="http://virtualbox.org">http://virtualbox.org</a>)</li>
 <li>Curl (Ubuntu: <code>sudo apt-get install curl</code>)</li>
 <li>Linux Only: unar (Ubuntu: <code>sudo apt-get install unar</code>)</li>
 <li>Patience</li>
-</ul><h2>Disk requirements</h2>
+</ul><h2>
+<a name="disk-requirements" class="anchor" href="#disk-requirements"><span class="octicon octicon-link"></span></a>Disk requirements</h2>
 
 <p>A full ievms install will require approximately 37G:</p>
 
 <pre><code>Servo:.ievms xdissent$ du -ch *
-5.7G  IE10 - Win8-disk1.vmdk
-2.6G  IE10 - Win8.ova
-2.5G  IE10_Win8.zip
-1.5G  IE6 - WinXP-disk1.vmdk
-724M  IE6 - WinXP.ova
-717M  IE6_WinXP.zip
-1.6G  IE7 - WinXP-disk1.vmdk
- 15M  IE7-WindowsXP-x86-enu.exe
-1.6G  IE8 - WinXP-disk1.vmdk
- 16M  IE8-WindowsXP-x86-ENU.exe
- 10G  IE9 - Win7-disk1.vmdk
-4.7G  IE9 - Win7.ova
-4.7G  IE9_Win7.zip
-3.4M  ievms-control.iso
-4.6M  lsar
-4.5M  unar
-4.1M  unar1.5.zip
- 37G  total
+ 11G    IE10 - Win7-disk1.vmdk
+ 22M    IE10-Windows6.1-x86-en-us.exe
+1.5G    IE6 - WinXP-disk1.vmdk
+724M    IE6 - WinXP.ova
+717M    IE6_WinXP.zip
+1.6G    IE7 - WinXP-disk1.vmdk
+ 15M    IE7-WindowsXP-x86-enu.exe
+1.6G    IE8 - WinXP-disk1.vmdk
+ 16M    IE8-WindowsXP-x86-ENU.exe
+ 11G    IE9 - Win7-disk1.vmdk
+4.7G    IE9 - Win7.ova
+4.7G    IE9_Win7.zip
+3.4M    ievms-control-0.1.0.iso
+4.6M    lsar
+4.5M    unar
+4.1M    unar1.5.zip
+ 37G    total
 </code></pre>
 
 <p>You may remove all files except <code>*.vmdk</code> after installation and they will be
@@ -85,27 +88,31 @@ re-downloaded if ievms is run again in the future:</p>
 <pre><code>$ find ~/.ievms -type f ! -name "*.vmdk" -exec rm {} \;
 </code></pre>
 
-<p>If all installation related files are removed, around 21G is required:</p>
+<p>If all installation related files are removed, around 26G is required:</p>
 
 <pre><code>Servo:.ievms xdissent$ du -ch *
-5.7G  IE10 - Win8-disk1.vmdk
-1.5G  IE6 - WinXP-disk1.vmdk
-1.6G  IE7 - WinXP-disk1.vmdk
-1.6G  IE8 - WinXP-disk1.vmdk
- 10G  IE9 - Win7-disk1.vmdk
- 21G  total
+ 11G    IE10 - Win7-disk1.vmdk
+1.5G    IE6 - WinXP-disk1.vmdk
+1.6G    IE7 - WinXP-disk1.vmdk
+1.6G    IE8 - WinXP-disk1.vmdk
+ 11G    IE9 - Win7-disk1.vmdk
+ 26G    total
 </code></pre>
 
-<h2>Bandwidth requirements</h2>
+<h2>
+<a name="bandwidth-requirements" class="anchor" href="#bandwidth-requirements"><span class="octicon octicon-link"></span></a>Bandwidth requirements</h2>
 
 <p>A full installation will download roughly 7.5G of data.</p>
 
 <p><strong>NOTE:</strong> Reusing the XP VM for IE7 and IE8 (the default) saves an incredible
 amount of space and bandwidth. If it is disabled (<code>REUSE_XP=no</code>) the disk space
 required climbs to 74G (39G if cleaned post-install) and around 17G will be 
-downloaded.</p>
+downloaded. Reusing the Win7 VM on the other hand (also the default), saves
+tons of bandwidth but pretty much breaks even on disk space. Disable it with 
+<code>REUSE_WIN7=no</code>.</p>
 
-<h1>Installation</h1>
+<h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
 
 <ol>
 <li><p>Install VirtualBox (make sure command line utilities are selected and installed).</p></li>
@@ -120,7 +127,7 @@ downloaded.</p>
 <li>
 <p>Install specific IE versions (IE7 and IE9 only for example):</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | IEVMS_VERSIONS="7 9" bash
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9" bash
 </code></pre>
 </li>
 </ul><ol>
@@ -130,7 +137,8 @@ downloaded.</p>
 download, depending on the speed of your internet connection. You might want
 to start the install and then go catch a movie, or maybe dinner, or both. </p>
 
-<h2>Recovering from a failed installation</h2>
+<h2>
+<a name="recovering-from-a-failed-installation" class="anchor" href="#recovering-from-a-failed-installation"><span class="octicon octicon-link"></span></a>Recovering from a failed installation</h2>
 
 <p>Each version is installed into <code>~/.ievms/</code> (or <code>INSTALL_PATH</code>). If the installation fails
 for any reason (corrupted download, for instance), delete the appropriate ZIP/ova file
@@ -138,24 +146,28 @@ and rerun the install.</p>
 
 <p>If nothing else, you can delete <code>~/.ievms</code> (or <code>INSTALL_PATH</code>) and rerun the install.</p>
 
-<h2>Specifying the install path</h2>
+<h2>
+<a name="specifying-the-install-path" class="anchor" href="#specifying-the-install-path"><span class="octicon octicon-link"></span></a>Specifying the install path</h2>
 
 <p>To specify where the VMs are installed, use the <code>INSTALL_PATH</code> variable:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | INSTALL_PATH="/Path/to/.ievms" bash
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env INSTALL_PATH="/Path/to/.ievms" bash
 </code></pre>
 
-<h2>Passing additional options to curl</h2>
+<h2>
+<a name="passing-additional-options-to-curl" class="anchor" href="#passing-additional-options-to-curl"><span class="octicon octicon-link"></span></a>Passing additional options to curl</h2>
 
 <p>The <code>curl</code> command is passed any options present in the <code>CURL_OPTS</code> 
 environment variable. For example, you can set a download speed limit:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | CURL_OPTS="--limit-rate 50k" bash
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env CURL_OPTS="--limit-rate 50k" bash
 </code></pre>
 
-<h1>Features</h1>
+<h1>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
 
-<h2>Clean Snapshot</h2>
+<h2>
+<a name="clean-snapshot" class="anchor" href="#clean-snapshot"><span class="octicon octicon-link"></span></a>Clean Snapshot</h2>
 
 <p>A snapshot is automatically taken upon install, allowing rollback to the
 pristine virtual environment configuration. Anything can go wrong in 
@@ -163,13 +175,22 @@ Windows and rather than having to worry about maintaining a stable VM,
 you can simply revert to the <code>clean</code> snapshot to reset your VM to the
 initial state.</p>
 
-<h2>Resuming Downloads</h2>
+<h2>
+<a name="guest-control" class="anchor" href="#guest-control"><span class="octicon octicon-link"></span></a>Guest Control</h2>
+
+<p>VirtualBox guest additions are installed after each virtual machine is created
+(and before the clean snapshot) and the appropriate steps are taken to enable
+guest control from the host machine.</p>
+
+<h2>
+<a name="resuming-downloads" class="anchor" href="#resuming-downloads"><span class="octicon octicon-link"></span></a>Resuming Downloads</h2>
 
 <p><del>If one of the comically large files fails to download, the <code>curl</code> 
 command used will automatically attempt to resume where it left off.</del>
 Unfortunately, the modern.IE download servers do not support resume.</p>
 
-<h2>Reusing XP VMs</h2>
+<h2>
+<a name="reusing-xp-vms" class="anchor" href="#reusing-xp-vms"><span class="octicon octicon-link"></span></a>Reusing XP VMs</h2>
 
 <p>IE7 and IE8 ship from MS on Vista and Win7 respectively. Both of these
 images are far larger than the IE6 XP image, which also technically supports
@@ -181,10 +202,27 @@ includes the updated browser version.</p>
 <p><strong>NOTE:</strong> If you'd like to disable XP VM reuse for IE7 and IE8, set the 
 environment variable <code>REUSE_XP</code> to anything other than <code>yes</code>:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | REUSE_XP="no" bash
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env REUSE_XP="no" bash
 </code></pre>
 
-<h2>Control ISO</h2>
+<h2>
+<a name="reusing-win7-vms" class="anchor" href="#reusing-win7-vms"><span class="octicon octicon-link"></span></a>Reusing Win7 VMs</h2>
+
+<p>Currently there exists a <a href="https://www.virtualbox.org/ticket/11134">bug</a> in 
+VirtualBox (or possibly elsewhere) that disables guest control after a Windows 8
+virtual machine's state is saved. To better support guest control and to
+eliminate yet another image download, ievms will re-use the IE9 Win7 image for
+IE10 by default. In addition, the Win7 VMs are the only ones which can be
+successfully "rearmed" to extend the activation period.</p>
+
+<p><strong>NOTE:</strong> If you'd like to disable Win7 VM reuse for IE10, set the environment 
+variable <code>REUSE_WIN7</code> to anything other than <code>yes</code>:</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | REUSE_WIN7="no" bash
+</code></pre>
+
+<h2>
+<a name="control-iso" class="anchor" href="#control-iso"><span class="octicon octicon-link"></span></a>Control ISO</h2>
 
 <p>Microsoft's XP image uses a blank password for the <code>IEUser</code>, which disallows
 control via Virtualbox's guest control by default. Changing a value in the
@@ -201,7 +239,8 @@ Vagrant and run <code>vagrant up</code>. The base ntpasswd boot disk will be dow
 unpacked and customized within the Vagrant VM. A custom linux kernel is 
 cross-compiled for the image as well.</p>
 
-<h1>Acknowledgements</h1>
+<h1>
+<a name="acknowledgements" class="anchor" href="#acknowledgements"><span class="octicon octicon-link"></span></a>Acknowledgements</h1>
 
 <ul>
 <li>
@@ -214,7 +253,8 @@ and registry editor.</li>
 kernel config reference.</li>
 <li>
 <a href="http://sourceforge.net/projects/uck/">uck</a> - Used to (re)master control ISO.</li>
-</ul><h1>License</h1>
+</ul><h1>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h1>
 
 <p>None. (To quote Morrissey, "take it, it's yours")</p>
       </section>
