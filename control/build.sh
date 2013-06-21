@@ -118,7 +118,12 @@ extract_initrd() {
 copy_scripts() {
   log "Copying scripts"
   cp "/vagrant/control/stage2" "${initrd}/scripts/"
-  cp "/vagrant/control/ievms.reg" "${initrd}/scripts/"
+  cp "/vagrant/control/xp.reg" "${initrd}/scripts/"
+  cp "/vagrant/control/deuac.reg" "${initrd}/scripts/"
+  cp "/vagrant/control/reuac.reg" "${initrd}/scripts/"
+  cp "/vagrant/control/vboxga.bat" "${initrd}/scripts/"
+  cp "/vagrant/control/ievms.xml" "${initrd}/scripts/"
+  cp "/vagrant/control/ievms.bat" "${initrd}/scripts/"
   cp "/vagrant/control/isolinux.cfg" "${remaster_iso}/isolinux.cfg"
   cp "/vagrant/control/isolinux.cfg" "${remaster_iso}/syslinux.cfg"
   cp "${kernel}" "${remaster_iso}/"

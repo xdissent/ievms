@@ -4,7 +4,30 @@ mkdir /tmp /disk
 chmod 777 /tmp
 sh /scripts/prepdriver.sh
 mdev -s
-ntfs-3g /dev/sda1 /disk -o rw,noatime
-reged -IC /disk/WINDOWS/system32/config/system HKEY_LOCAL_MACHINE\\SYSTEM /scripts/ievms.reg
+
+if [ -b /dev/sda2 ]
+then
+  ntfs-3g /dev/sda2 /disk -o rw,noatime
+else
+  ntfs-3g /dev/sda1 /disk -o rw,noatime
+fi
+
+if [ -d /disk/WINDOWS ]
+then
+  reged -IC /disk/WINDOWS/system32/config/system HKEY_LOCAL_MACHINE\\SYSTEM /scripts/xp.reg
+else
+  reged -IC /disk/Windows/System32/config/SOFTWARE HKEY_LOCAL_MACHINE\\SOFTWARE /scripts/deuac.reg
+
+  if [ -d /disk/ProgramData/Microsoft/Windows/Start\ Menu/Programs/Startup ]
+  then
+    cp /scripts/vboxga.bat /disk/ProgramData/Microsoft/Windows/Start\ Menu/Programs/Startup/
+  else
+    cp /scripts/vboxga.bat /disk/ProgramData/Microsoft/Windows/Start\ Menu/Programs/StartUp/
+  fi
+
+  cp /scripts/reuac.reg /disk/reuac.reg
+  cp /scripts/ievms.xml /disk/ievms.xml
+  cp /scripts/ievms.bat /disk/ievms.bat
+fi
 umount /disk 2>/dev/null
 poweroff
