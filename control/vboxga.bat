@@ -6,10 +6,10 @@ VBoxWindowsAdditions.exe /S
 regedit.exe /S C:\reuac.reg
 del C:\reuac.reg
 FOR /F "usebackq" %%i IN (`hostname`) DO SET HOST=%%i
-schtasks.exe /create /s %HOST% /ru %HOST%\IEUser /rp Passw0rd! /tn activate /xml C:\activate.xml
-schtasks.exe /create /s %HOST% /ru %HOST%\IEUser /rp Passw0rd! /tn rearm /xml C:\rearm.xml
-schtasks.exe /create /s %HOST% /ru %HOST%\IEUser /rp Passw0rd! /tn boot /xml C:\boot.xml
-schtasks.exe /run /tn activate
+schtasks.exe /create /s %HOST% /ru %HOST%\IEUser /rp Passw0rd! /tn ievms /xml C:\ievms.xml
+echo slmgr.vbs /ato >C:\Users\IEUser\ievms.bat
+schtasks.exe /run /tn ievms
 timeout /t 30
+del C:\Users\IEUser\ievms.bat
 shutdown.exe /s /t 00
 del %0

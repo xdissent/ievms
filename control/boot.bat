@@ -1,1 +1,0 @@
-if exist c:\ievms.bat start c:\ievms.bat

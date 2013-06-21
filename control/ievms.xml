@@ -4,11 +4,7 @@
     <Date>2013-06-20T12:19:16.22375</Date>
     <Author>IE9Win7\IEUser</Author>
   </RegistrationInfo>
-  <Triggers>
-    <BootTrigger>
-      <Enabled>true</Enabled>
-    </BootTrigger>
-  </Triggers>
+  <Triggers />
   <Principals>
     <Principal id="Author">
       <UserId>IE9Win7\IEUser</UserId>
@@ -37,7 +33,7 @@
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>C:\boot.bat</Command>
+      <Command>C:\ievms.bat</Command>
     </Exec>
   </Actions>
 </Task>
