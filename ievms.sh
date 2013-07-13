@@ -38,7 +38,8 @@ fail() { log "\nERROR: $*\n" ; exit 1 ; }
 download() {
     if [[ -f "${3}" ]]
     then
-        log "Found ${1} at ${3} - skipping download"
+        log "Found ${1} at ${3} - checking if download completed before proceeding"
+        curl ${curl_opts} -C - -L "${2}" -o "${3}"
     else
         log "Downloading ${1} from ${2} to ${3}"
         curl ${curl_opts} -L "${2}" -o "${3}" || fail "Failed to download ${2} to ${ievms_home}/${3} using 'curl', error code ($?)"
@@ -224,7 +225,7 @@ copy_to_vm() {
     local pass=${4:-""}
     log "Copying ${2} to ${3}"
     VBoxManage guestcontrol "${1}" cp "${ievms_home}/${2}" "${3}" \
-        --username IEUser --password "${pass}"   
+        --username IEUser --password "${pass}"
 }
 
 # Install an alternative version of IE in an XP virtual machine. Downloads the
@@ -311,7 +312,7 @@ build_ievm() {
     unit=${unit:-"11"}
     local ova=`basename "${archive/_/ - }" .zip`.ova
     local url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
-    
+
     log "Checking for existing OVA at ${ievms_home}/${ova}"
     if [[ ! -f "${ova}" ]]
     then
@@ -330,7 +331,7 @@ build_ievm() {
 
         log "Building ${vm} VM"
         declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
-        
+
         log "Creating clean snapshot"
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
     fi
