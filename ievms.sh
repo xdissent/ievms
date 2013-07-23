@@ -47,6 +47,8 @@ download() {
 
 # ## General Setup
 
+vboxmanage=VBoxManage
+
 # Create the ievms home folder and `cd` into it. The `INSTALL_PATH` env variable
 # is used to determine the full path. The home folder is then added to `PATH`.
 create_home() {
@@ -64,9 +66,12 @@ create_home() {
 
 # Check for a supported host system (Linux/OS X).
 check_system() {
-    kernel=`uname -s`
+    local kernel=`uname -s`
     case $kernel in
-        Darwin|Linux) ;;
+        Darwin)     os=darwin ;;
+        Linux)      os=linux ;;
+        MINGW*_NT*) os=mingw ;;
+        CYGWIN_NT*) os=cygwin ;;
         *) fail "Sorry, $kernel is not supported." ;;
     esac
 }
@@ -74,13 +79,19 @@ check_system() {
 # Ensure VirtualBox is installed and `VBoxManage` is on the `PATH`.
 check_virtualbox() {
     log "Checking for VirtualBox"
-    hash VBoxManage 2>&- || fail "VirtualBox command line utilities are not installed, please (re)install! (http://virtualbox.org)"
+    if [[ $VBOX_INSTALL_PATH != "" ]] ; then
+        # VirtualBox usually sets this env variable on Windows (cygwin, mingw).
+        vboxmanage="${VBOX_INSTALL_PATH}VBoxManage.exe"
+        # cygwin chokes in windows paths (mingw seems to like them).
+        [[ "$os" == cygwin ]] && vboxmanage=`cygpath -u "$vboxmanage"`
+    fi
+    command -v "$vboxmanage" &>/dev/null || fail "VirtualBox command line utilities are not in your \$PATH, or they\nare not installed; please (re)install! (http://virtualbox.org)"
 }
 
 # Determine the VirtualBox version details, querying the download page to ensure
 # validity.
 check_version() {
-    local version=`VBoxManage -v`
+    local version=`"$vboxmanage" -v`
     major_minor_release="${version%%[-_r]*}"
     local major_minor="${version%.*}"
     local dl_page=`curl ${curl_opts} -L "http://download.virtualbox.org/virtualbox/" 2>/dev/null`
@@ -105,7 +116,7 @@ check_version() {
 # Check for the VirtualBox Extension Pack and install if not found.
 check_ext_pack() {
     log "Checking for Oracle VM VirtualBox Extension Pack"
-    if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
+    if ! "$vboxmanage" list extpacks | grep "Oracle VM VirtualBox Extension Pack"
     then
         check_version
         local archive="Oracle_VM_VirtualBox_Extension_Pack-${major_minor_release}.vbox-extpack"
@@ -114,7 +125,7 @@ check_ext_pack() {
         download "Oracle VM VirtualBox Extension Pack" "${url}" "${archive}"
 
         log "Installing Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}"
-        VBoxManage extpack install "${archive}" || fail "Failed to install Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}, error code ($?)"
+        "$vboxmanage" extpack install "${archive}" || fail "Failed to install Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}, error code ($?)"
     fi
 }
 
@@ -131,12 +142,22 @@ install_unar() {
 }
 
 # Check for the `unar` command, downloading and installing it if not found.
+# On Linux and Windows (cygwin, mingw), fall back to 7zip.
 check_unar() {
-    if [ "${kernel}" == "Darwin" ]
-    then
+    if [ "$os" == darwin ] ; then
         hash unar 2>&- || install_unar
+    elif [[ "$os" == mingw || "$os" == cygwin ]] ; then
+        # Assume 7z.exe is in $PATH.
+        bin_7z=7z
+
+        if ! command -v "$bin_7z" &>/dev/null ; then
+            # 7z.exe is not in $PATH, so try the default location.
+            bin_7z='/c/Program Files/7-Zip/7z'
+            [[ "$os" == cygwin ]] && bin_7z="/cygdrive${bin_7z}"
+        fi
+        command -v "$bin_7z" &>/dev/null || fail "7-zip is not in your \$PATH and it is not installed in the default location.\nInstall 7-zip: http://www.7-zip.org"
     else
-        hash unar 2>&- || fail "Linux support requires unar (sudo apt-get install for Ubuntu/Debian)"
+        hash unar 2>&- || bin_7z=7za ; hash "$bin_7z" 2>&- || fail "Linux support requires 7za (7-zip) or unar. To install: 'sudo apt-get install' (for Ubuntu/Debian)"
     fi
 }
 
@@ -145,7 +166,7 @@ wait_for_shutdown() {
     local x="0" ; until [ "${x}" != "0" ] ; do
         log "Waiting for ${1} to shutdown..."
         sleep "${sleep_wait}"
-        VBoxManage list runningvms | grep "${1}" >/dev/null && x=$? || x=$?
+        "$vboxmanage" list runningvms | grep "${1}" >/dev/null && x=$? || x=$?
     done
     sleep "${sleep_wait}" # Extra sleep for good measure.
 }
@@ -156,7 +177,7 @@ wait_for_guestcontrol() {
     x="1" ; until [ "${x}" == "0" ] ; do
         log "Waiting for ${1} to be available for guestcontrol..."
         sleep "${sleep_wait}"
-        VBoxManage guestcontrol "${1}" cp "/etc/passwd" "/" --username IEUser \
+        "$vboxmanage" guestcontrol "${1}" cp "/etc/passwd" "/" --username IEUser \
             --password "${pass}" --dryrun && x=$? || x=$?
     done
     sleep "${sleep_wait}" # Extra sleep for good measure.
@@ -178,14 +199,14 @@ find_iso() {
 # Attach a dvd image to the virtual machine.
 attach() {
     log "Attaching ${3}"
-    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 1 \
+    "$vboxmanage" storageattach "${1}" --storagectl "IDE Controller" --port 1 \
         --device 0 --type dvddrive --medium "${2}"
 }
 
 # Eject the dvd image from the virtual machine.
 eject() {
     log "Ejecting ${2}"
-    VBoxManage modifyvm "${1}" --dvd none
+    "$vboxmanage" modifyvm "${1}" --dvd none
 }
 
 # Boot the virtual machine with the control ISO in the dvd drive then wait for
@@ -215,7 +236,7 @@ boot_auto_ga() {
 # Start a virtual machine in headless mode.
 start_vm() {
     log "Starting VM ${1}"
-    VBoxManage startvm "${1}" --type headless
+    "$vboxmanage" startvm "${1}" --type headless
 }
 
 # Copy a file to the virtual machine. An optional password will be used
@@ -223,7 +244,7 @@ start_vm() {
 copy_to_vm() {
     local pass=${4:-""}
     log "Copying ${2} to ${3}"
-    VBoxManage guestcontrol "${1}" cp "${ievms_home}/${2}" "${3}" \
+    "$vboxmanage" guestcontrol "${1}" cp "${ievms_home}/${2}" "${3}" \
         --username IEUser --password "${pass}"   
 }
 
@@ -239,11 +260,11 @@ install_ie_xp() { # vm url
     copy_to_vm "${1}" "${src}" "${dest}"
 
     log "Installing IE" # Always "fails"
-    VBoxManage guestcontrol "${1}" exec --image "${dest}" \
+    "$vboxmanage" guestcontrol "${1}" exec --image "${dest}" \
         --username IEUser --wait-exit -- /passive /norestart || true
 
     log "Shutting down ${1}"
-    VBoxManage guestcontrol "${1}" exec --image "shutdown.exe" \
+    "$vboxmanage" guestcontrol "${1}" exec --image "shutdown.exe" \
         --username IEUser --wait-exit -- /s /f /t 0
 
     wait_for_shutdown "${1}"
@@ -262,13 +283,13 @@ install_ie_win7() { # vm url
     copy_to_vm "${1}" "${src}" "${dest}" "${pass}"
 
     log "Installing IE"
-    VBoxManage guestcontrol "${1}" exec --image "cmd.exe" \
+    "$vboxmanage" guestcontrol "${1}" exec --image "cmd.exe" \
         --username IEUser --password "${pass}" --wait-exit -- \
         /c "echo ${dest} /passive /norestart >C:\\Users\\IEUser\\ievms.bat"
-    VBoxManage guestcontrol "${1}" exec --image "cmd.exe" \
+    "$vboxmanage" guestcontrol "${1}" exec --image "cmd.exe" \
         --username IEUser --password "${pass}" --wait-exit -- \
         /c "echo shutdown.exe /s /f /t 0 >>C:\\Users\\IEUser\\ievms.bat"
-    VBoxManage guestcontrol "${1}" exec --image "schtasks.exe" \
+    "$vboxmanage" guestcontrol "${1}" exec --image "schtasks.exe" \
         --username IEUser --password "${pass}" --wait-exit -- \
         /run /tn ievms
 
@@ -312,27 +333,36 @@ build_ievm() {
     local ova=`basename "${archive/_/ - }" .zip`.ova
     local url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
     
-    log "Checking for existing OVA at ${ievms_home}/${ova}"
-    if [[ ! -f "${ova}" ]]
+    log "Checking for existing OVA: ${ievms_home}/${ova}"
+    if [[ -f "${ova}" ]]
     then
+        log "OVA already exists: ${ova}"
+    else
         download "OVA ZIP" "${url}" "${archive}"
 
         log "Extracting OVA from ${ievms_home}/${archive}"
-        unar "${archive}" || fail "Failed to extract ${archive} to ${ievms_home}/${ova}, unar command returned error code $?"
+
+        if [[ "${bin_7z}" ]] ; then
+            "${bin_7z}" e "${archive}" || fail "Failed to extract ${archive} to ${ievms_home}/${ova}, 7-zip returned error code $?"
+        else
+            unar "${archive}" || fail "Failed to extract ${archive} to ${ievms_home}/${ova}, unar command returned error code $?"
+        fi
     fi
 
-    log "Checking for existing ${vm} VM"
-    if ! VBoxManage showvminfo "${vm}" >/dev/null 2>/dev/null
+    log "Checking for existing VM: ${vm}"
+    if "$vboxmanage" showvminfo "${vm}" &>/dev/null
     then
+        log "VM already exists: ${vm}"
+    else
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
         log "Creating ${vm} VM (disk: ${disk_path})"
-        VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
+        "$vboxmanage" import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
 
         log "Building ${vm} VM"
         declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
         
         log "Creating clean snapshot"
-        VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
+        "$vboxmanage" snapshot "${vm}" take clean --description "The initial VM state"
     fi
 }
 
