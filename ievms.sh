@@ -9,7 +9,7 @@ set -o pipefail
 # ## Gobal Variables
 
 # The ievms version.
-ievms_version="0.1.0"
+ievms_version="0.1.1"
 
 # Options passed to each `curl` command.
 curl_opts=${CURL_OPTS:-""}
@@ -293,9 +293,10 @@ build_ievm() {
             fi
             ;;
         9) os="Win7" ;;
-        10)
+        10|11)
             if [ "${reuse_win7}" != "yes" ]
             then
+                if [ "$1" == "11" ]; then fail "IE11 is only available if REUSE_WIN7 is set"; fi
                 os="Win8"
             else
                 os="Win7"
@@ -379,6 +380,12 @@ build_ievm_ie10() {
     fi
 }
 
+# Build the IE11 virtual machine, reusing the Win7 VM always.
+build_ievm_ie11() {
+    boot_auto_ga "IE11 - Win7"
+    install_ie_win7 "IE11 - Win7" "http://download.microsoft.com/download/6/4/2/6424D5F5-4514-4D4F-8D8A-285DADF1E06F/IE11-Windows6.1-x86-en-us.exe"
+}
+
 # ## Main Entry Point
 
 # Run through all checks to get the host ready for installation.
@@ -389,7 +396,7 @@ check_ext_pack
 check_unar
 
 # Install each requested virtual machine sequentially.
-all_versions="6 7 8 9 10"
+all_versions="6 7 8 9 10 11"
 for ver in ${IEVMS_VERSIONS:-$all_versions}
 do
     log "Building IE${ver} VM"
