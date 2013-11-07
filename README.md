@@ -235,4 +235,4 @@ kernel config reference.
 License
 =======
 
-None. (To quote Morrissey, "take it, it's yours")
+Unrestricted. (To quote Morrissey, "take it, it's yours")
