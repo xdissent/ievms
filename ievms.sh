@@ -328,6 +328,9 @@ build_ievm() {
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
         log "Creating ${vm} VM (disk: ${disk_path})"
         VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
+        
+        log "Modifying ${vm} VRAM size to 32MB"
+        VBoxManage modifyvm "${vm}" --vram 32
 
         log "Building ${vm} VM"
         declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
