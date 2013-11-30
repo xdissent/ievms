@@ -21,15 +21,21 @@ reuse_xp=${REUSE_XP:-"yes"}
 reuse_win7=${REUSE_WIN7:-"yes"}
 
 # Timeout interval to wait between checks for various states.
-sleep_wait="10"
+sleep_wait="5"
 
 # Store the original `cwd`.
 orig_cwd=`pwd`
 
+# The VM user to use for guest control.
+guest_user="IEUser"
+
+# The VM user password to use for guest control.
+guest_pass="Passw0rd!"
+
 # ## Utilities
 
 # Print a message to the console.
-log()  { printf "$*\n" ; return $? ;  }
+log()  { printf "$*\n" ; return $? ; }
 
 # Print an error message to the console and bail out of the script.
 fail() { log "\nERROR: $*\n" ; exit 1 ; }
@@ -142,24 +148,20 @@ check_unar() {
 
 # Pause execution until the virtual machine with a given name shuts down.
 wait_for_shutdown() {
-    local x="0" ; until [ "${x}" != "0" ] ; do
+    while true ; do
         log "Waiting for ${1} to shutdown..."
         sleep "${sleep_wait}"
-        VBoxManage list runningvms | grep "${1}" >/dev/null && x=$? || x=$?
+        VBoxManage showvminfo "${1}" | grep "State:" | grep -q "powered off" && return 0 || true
     done
-    sleep "${sleep_wait}" # Extra sleep for good measure.
 }
 
 # Pause execution until guest control is available for a virtual machine.
 wait_for_guestcontrol() {
-    local pass=${2:-""}
-    x="1" ; until [ "${x}" == "0" ] ; do
+    while true ; do
         log "Waiting for ${1} to be available for guestcontrol..."
         sleep "${sleep_wait}"
-        VBoxManage guestcontrol "${1}" cp "/etc/passwd" "/" --username IEUser \
-            --password "${pass}" --dryrun && x=$? || x=$?
+        VBoxManage showvminfo "${1}" | grep 'Additions run level:' | grep -q "3" && return 0 || true
     done
-    sleep "${sleep_wait}" # Extra sleep for good measure.
 }
 
 # Find or download the ievms control ISO.
@@ -221,56 +223,83 @@ start_vm() {
 # Copy a file to the virtual machine. An optional password will be used
 # if given.
 copy_to_vm() {
-    local pass=${4:-""}
     log "Copying ${2} to ${3}"
     VBoxManage guestcontrol "${1}" cp "${ievms_home}/${2}" "${3}" \
-        --username IEUser --password "${pass}"   
+        --username "${guest_user}" --password "${guest_pass}"
+}
+
+# Execute a command with arguments on a virtual machine.
+guest_control_exec() {
+    local vm="${1}"
+    local image="${2}"
+    shift; shift
+    VBoxManage guestcontrol "${vm}" exec --image "${image}" \
+        --username "${guest_user}" --password "${guest_pass}" \
+        --wait-exit -- "$@"
+}
+
+# Start an XP virtual machine and set the password for the guest user.
+set_xp_password() {
+    start_vm "${1}"
+    wait_for_guestcontrol "${1}"
+
+    log "Setting ${guest_user} password"
+    VBoxManage guestcontrol "${1}" exec --image "net.exe" --username \
+        Administrator --password "${guest_pass}" --wait-exit -- \
+        user "${guest_user}" "${guest_pass}"
+
+    log "Setting auto logon password"
+    VBoxManage guestcontrol "${1}" exec --image "reg.exe" --username \
+        Administrator --password "${guest_pass}" --wait-exit -- add \
+        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
+        /f /v DefaultPassword /t REG_SZ /d "${guest_pass}"
+
+    log "Enabling auto admin logon"
+    VBoxManage guestcontrol "${1}" exec --image "reg.exe" --username \
+        Administrator --password "${guest_pass}" --wait-exit -- add \
+        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
+        /f /v AutoAdminLogon /t REG_SZ /d 1
+}
+
+# Shutdown an XP virtual machine and wait for it to power off.
+shutdown_xp() {
+    log "Shutting down ${1}"
+    guest_control_exec "${1}" "shutdown.exe" /s /f /t 0
+    wait_for_shutdown "${1}"
 }
 
 # Install an alternative version of IE in an XP virtual machine. Downloads the
 # installer, copies it to the vm, then runs it before shutting down.
 install_ie_xp() { # vm url
     local src=`basename "${2}"`
-    local dest="/Documents and Settings/IEUser/Desktop/${src}"
+    local dest="/Documents and Settings/${guest_user}/Desktop/${src}"
 
     download "${src}" "${2}" "${src}"
-    start_vm "${1}"
-    wait_for_guestcontrol "${1}"
     copy_to_vm "${1}" "${src}" "${dest}"
 
     log "Installing IE" # Always "fails"
-    VBoxManage guestcontrol "${1}" exec --image "${dest}" \
-        --username IEUser --wait-exit -- /passive /norestart || true
+    guest_control_exec "${1}" "${dest}" /passive /norestart || true
 
-    log "Shutting down ${1}"
-    VBoxManage guestcontrol "${1}" exec --image "shutdown.exe" \
-        --username IEUser --wait-exit -- /s /f /t 0
-
-    wait_for_shutdown "${1}"
+    shutdown_xp "${1}"
 }
 
 # Install an alternative version of IE in a Win7 virtual machine. Downloads the
 # installer, copies it to the vm, then runs it before shutting down.
 install_ie_win7() { # vm url
     local src=`basename "${2}"`
-    local dest="/Users/IEUser/Desktop/${src}"
-    local pass='Passw0rd!'
+    local dest="/Users/${guest_user}/Desktop/${src}"
 
     download "${src}" "${2}" "${src}"
     start_vm "${1}"
-    wait_for_guestcontrol "${1}" "${pass}"
-    copy_to_vm "${1}" "${src}" "${dest}" "${pass}"
+    wait_for_guestcontrol "${1}"
+    copy_to_vm "${1}" "${src}" "${dest}"
 
     log "Installing IE"
-    VBoxManage guestcontrol "${1}" exec --image "cmd.exe" \
-        --username IEUser --password "${pass}" --wait-exit -- \
-        /c "echo ${dest} /passive /norestart >C:\\Users\\IEUser\\ievms.bat"
-    VBoxManage guestcontrol "${1}" exec --image "cmd.exe" \
-        --username IEUser --password "${pass}" --wait-exit -- \
-        /c "echo shutdown.exe /s /f /t 0 >>C:\\Users\\IEUser\\ievms.bat"
-    VBoxManage guestcontrol "${1}" exec --image "schtasks.exe" \
-        --username IEUser --password "${pass}" --wait-exit -- \
-        /run /tn ievms
+    guest_control_exec "${1}" "cmd.exe" /c \
+        "echo ${dest} /passive /norestart >C:\\Users\\${guest_user}\\ievms.bat"
+    guest_control_exec "${1}" "cmd.exe" /c \
+        "echo shutdown.exe /s /f /t 0 >>C:\\Users\\${guest_user}\\ievms.bat"
+    guest_control_exec "${1}" "schtasks.exe" /run /tn ievms
 
     wait_for_shutdown "${1}"
 }
@@ -331,6 +360,9 @@ build_ievm() {
 
         log "Building ${vm} VM"
         declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
+
+        log "Tagging VM with ievms version"
+        VBoxManage setextradata "${vm}" "ievms" "{\"version\":\"${ievms_version}\"}"
         
         log "Creating clean snapshot"
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
@@ -339,7 +371,8 @@ build_ievm() {
 
 # Build the IE6 virtual machine.
 build_ievm_ie6() {
-    boot_ievms "IE6 - WinXP"
+    set_xp_password "IE6 - WinXP"
+    shutdown_xp "IE6 - WinXP"
 }
 
 # Build the IE7 virtual machine, reusing the XP VM if requested (the default).
@@ -348,7 +381,7 @@ build_ievm_ie7() {
     then
         boot_auto_ga "IE7 - Vista"
     else
-        boot_ievms "IE7 - WinXP"
+        set_xp_password "IE7 - WinXP"
         install_ie_xp "IE7 - WinXP" "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe"
     fi
 }
@@ -359,7 +392,7 @@ build_ievm_ie8() {
     then
         boot_auto_ga "IE8 - Win7"
     else
-        boot_ievms "IE8 - WinXP"
+        set_xp_password "IE8 - WinXP"
         install_ie_xp "IE8 - WinXP" "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe"
     fi
 }
