@@ -172,7 +172,7 @@ Reusing XP VMs
 
 IE7 and IE8 ship from MS on Vista and Win7 respectively. Both of these
 images are far larger than the IE6 XP image, which also technically supports
-IE7 and IE8. To save bandwidth, space and time, ievms will will reuse
+IE7 and IE8. To save bandwidth, space and time, ievms will reuse
 (duplicate) the IE6 XP VM image for both. Virtualbox guest control is used
 to run the appropriate IE installer within the VM. The `clean` snapshot
 includes the updated browser version.
