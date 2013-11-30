@@ -36,7 +36,7 @@ in multiple versions of IE, regardless of the host operating system.
 <del>Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
 can be extremely difficult. The ievms scripts aim to facilitate that process using
 VirtualBox on Linux or OS X.</del> With a single command, you can have IE6, IE7, IE8,
-IE9 and IE10 running in separate virtual machines. </p>
+IE9, IE10 and IE11 running in separate virtual machines. </p>
 
 <p><strong>NOTE:</strong> As of Feb. 1st, 2013, the <a href="http://www.modern.ie/virtualization-tools">MS images</a>
 are fully compatible with Virtualbox, thanks to the <a href="http://modern.IE">modern.IE</a>
@@ -60,11 +60,13 @@ project.</p>
 </ul><h2>
 <a name="disk-requirements" class="anchor" href="#disk-requirements"><span class="octicon octicon-link"></span></a>Disk requirements</h2>
 
-<p>A full ievms install will require approximately 37G:</p>
+<p>A full ievms install will require approximately 48G:</p>
 
 <pre><code>Servo:.ievms xdissent$ du -ch *
  11G    IE10 - Win7-disk1.vmdk
  22M    IE10-Windows6.1-x86-en-us.exe
+ 11G    IE11 - Win7-disk1.vmdk
+ 28M    IE11-Windows6.1-x86-en-us.exe
 1.5G    IE6 - WinXP-disk1.vmdk
 724M    IE6 - WinXP.ova
 717M    IE6_WinXP.zip
@@ -79,7 +81,7 @@ project.</p>
 4.6M    lsar
 4.5M    unar
 4.1M    unar1.5.zip
- 37G    total
+ 48G    total
 </code></pre>
 
 <p>You may remove all files except <code>*.vmdk</code> after installation and they will be
@@ -88,15 +90,16 @@ re-downloaded if ievms is run again in the future:</p>
 <pre><code>$ find ~/.ievms -type f ! -name "*.vmdk" -exec rm {} \;
 </code></pre>
 
-<p>If all installation related files are removed, around 26G is required:</p>
+<p>If all installation related files are removed, around 37G is required:</p>
 
 <pre><code>Servo:.ievms xdissent$ du -ch *
  11G    IE10 - Win7-disk1.vmdk
+ 11G    IE11 - Win7-disk1.vmdk
 1.5G    IE6 - WinXP-disk1.vmdk
 1.6G    IE7 - WinXP-disk1.vmdk
 1.6G    IE8 - WinXP-disk1.vmdk
  11G    IE9 - Win7-disk1.vmdk
- 26G    total
+ 37G    total
 </code></pre>
 
 <h2>
@@ -116,21 +119,23 @@ tons of bandwidth but pretty much breaks even on disk space. Disable it with
 
 <ol>
 <li><p>Install VirtualBox (make sure command line utilities are selected and installed).</p></li>
-<li><p>Download and unpack ievms:</p></li>
-</ol><ul>
 <li>
-<p>Install IE versions 6, 7, 8, 9 and 10.</p>
+<p>Download and unpack ievms:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
-</code></pre>
+<ul>
+<li>
+<p>Install IE versions 6, 7, 8, 9, 10 and 11.</p>
+
+<p>curl -s <a href="https://raw.github.com/xdissent/ievms/master/ievms.sh">https://raw.github.com/xdissent/ievms/master/ievms.sh</a> | bash</p>
 </li>
 <li>
 <p>Install specific IE versions (IE7 and IE9 only for example):</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9" bash
-</code></pre>
+<p>curl -s <a href="https://raw.github.com/xdissent/ievms/master/ievms.sh">https://raw.github.com/xdissent/ievms/master/ievms.sh</a> | env IEVMS_VERSIONS="7 9" bash</p>
 </li>
-</ul><ol>
+</ul>
+</li>
+</ol><ol>
 <li><p>Launch Virtual Box.</p></li>
 <li><p>Choose ievms image from Virtual Box.</p></li>
 </ol><p>The OVA images are massive and can take hours or tens of minutes to 
@@ -194,7 +199,7 @@ Unfortunately, the modern.IE download servers do not support resume.</p>
 
 <p>IE7 and IE8 ship from MS on Vista and Win7 respectively. Both of these
 images are far larger than the IE6 XP image, which also technically supports
-IE7 and IE8. To save bandwidth, space and time, ievms will will reuse
+IE7 and IE8. To save bandwidth, space and time, ievms will reuse
 (duplicate) the IE6 XP VM image for both. Virtualbox guest control is used
 to run the appropriate IE installer within the VM. The <code>clean</code> snapshot
 includes the updated browser version.</p>
@@ -212,14 +217,17 @@ environment variable <code>REUSE_XP</code> to anything other than <code>yes</cod
 VirtualBox (or possibly elsewhere) that disables guest control after a Windows 8
 virtual machine's state is saved. To better support guest control and to
 eliminate yet another image download, ievms will re-use the IE9 Win7 image for
-IE10 by default. In addition, the Win7 VMs are the only ones which can be
-successfully "rearmed" to extend the activation period.</p>
+IE10 and IE11 by default. In addition, the Win7 VMs are the only ones which can
+be successfully "rearmed" to extend the activation period.</p>
 
 <p><strong>NOTE:</strong> If you'd like to disable Win7 VM reuse for IE10, set the environment 
 variable <code>REUSE_WIN7</code> to anything other than <code>yes</code>:</p>
 
 <pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | REUSE_WIN7="no" bash
 </code></pre>
+
+<p><strong>NOTE:</strong> It is currently impossible to install IE11 <strong>without</strong> reusing the
+Win7 virtual machine.</p>
 
 <h2>
 <a name="control-iso" class="anchor" href="#control-iso"><span class="octicon octicon-link"></span></a>Control ISO</h2>
