@@ -3,14 +3,8 @@ Overview
 
 Microsoft provides virtual machine disk images to facilitate website testing 
 in multiple versions of IE, regardless of the host operating system. 
-~~Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
-can be extremely difficult. The ievms scripts aim to facilitate that process using
-VirtualBox on Linux or OS X.~~ With a single command, you can have IE6, IE7, IE8,
+With a single command, you can have IE6, IE7, IE8,
 IE9, IE10 and IE11 running in separate virtual machines. 
-
-**NOTE:** As of Feb. 1st, 2013, the [MS images](http://www.modern.ie/virtualization-tools)
-are fully compatible with Virtualbox, thanks to the [modern.IE](http://modern.IE)
-project.
 
 [![Click here to lend your support to ievms and make a donation at pledgie.com!](http://pledgie.com/campaigns/15995.png?skin_name=chrome)](http://pledgie.com/campaigns/15995)
 
@@ -18,7 +12,8 @@ project.
 Quickstart
 ==========
 
-Just paste this into a terminal: `curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash`
+Just paste this into a terminal: 
+`curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash`
 
 
 Requirements
