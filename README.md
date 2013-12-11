@@ -13,7 +13,8 @@ Quickstart
 ==========
 
 Just paste this into a terminal: 
-`curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash`
+
+    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
 
 
 Requirements
