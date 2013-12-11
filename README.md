@@ -24,10 +24,61 @@ Just paste this into a terminal: `curl -s https://raw.github.com/xdissent/ievms/
 Requirements
 ============
 
-* VirtualBox (http://virtualbox.org)
+* VirtualBox (http://virtualbox.org), select 'command line utilities' during installation
 * Curl (Ubuntu: `sudo apt-get install curl`)
 * Linux Only: unar (Ubuntu: `sudo apt-get install unar`)
 * Patience
+
+
+Installation
+============
+
+**1.)** Install [VirtualBox](http://virtualbox.org) and check the [Requirements](#requirements)
+
+**2.)** Download and unpack ievms:
+
+   * To install IE versions 6, 7, 8, 9, 10 and 11 use:
+
+        curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
+
+   * To install specific IE versions (IE7 and IE9 only for example) use:
+
+        curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9" bash
+
+**3.)** Launch Virtual Box.
+
+**4.)** Choose ievms image from Virtual Box.
+
+The OVA images are massive and can take hours or tens of minutes to 
+download, depending on the speed of your internet connection. You might want
+to start the install and then go catch a movie, or maybe dinner, or both. 
+
+
+Recovering from a failed installation
+-------------------------------------
+
+Each version is installed into `~/.ievms/` (or `INSTALL_PATH`). If the installation fails
+for any reason (corrupted download, for instance), delete the appropriate ZIP/ova file
+and rerun the install.
+
+If nothing else, you can delete `~/.ievms` (or `INSTALL_PATH`) and rerun the install.
+
+
+Specifying the install path
+---------------------------
+
+To specify where the VMs are installed, use the `INSTALL_PATH` variable:
+
+    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env INSTALL_PATH="/Path/to/.ievms" bash
+
+
+Passing additional options to curl
+----------------------------------
+
+The `curl` command is passed any options present in the `CURL_OPTS` 
+environment variable. For example, you can set a download speed limit:
+
+    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env CURL_OPTS="--limit-rate 50k" bash
 
 
 Disk requirements
@@ -84,57 +135,6 @@ required climbs to 74G (39G if cleaned post-install) and around 17G will be
 downloaded. Reusing the Win7 VM on the other hand (also the default), saves
 tons of bandwidth but pretty much breaks even on disk space. Disable it with 
 `REUSE_WIN7=no`.
-
-
-Installation
-============
-
-1. Install VirtualBox (make sure command line utilities are selected and installed).
-
-2. Download and unpack ievms:
-
-   * Install IE versions 6, 7, 8, 9, 10 and 11.
-
-        curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
-
-   * Install specific IE versions (IE7 and IE9 only for example):
-
-        curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9" bash
-
-3. Launch Virtual Box.
-
-4. Choose ievms image from Virtual Box.
-
-The OVA images are massive and can take hours or tens of minutes to 
-download, depending on the speed of your internet connection. You might want
-to start the install and then go catch a movie, or maybe dinner, or both. 
-
-
-Recovering from a failed installation
--------------------------------------
-
-Each version is installed into `~/.ievms/` (or `INSTALL_PATH`). If the installation fails
-for any reason (corrupted download, for instance), delete the appropriate ZIP/ova file
-and rerun the install.
-
-If nothing else, you can delete `~/.ievms` (or `INSTALL_PATH`) and rerun the install.
-
-
-Specifying the install path
----------------------------
-
-To specify where the VMs are installed, use the `INSTALL_PATH` variable:
-
-    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env INSTALL_PATH="/Path/to/.ievms" bash
-
-
-Passing additional options to curl
-----------------------------------
-
-The `curl` command is passed any options present in the `CURL_OPTS` 
-environment variable. For example, you can set a download speed limit:
-
-    curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env CURL_OPTS="--limit-rate 50k" bash
 
 
 Features
