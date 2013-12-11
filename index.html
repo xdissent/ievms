@@ -33,31 +33,82 @@
 
 <p>Microsoft provides virtual machine disk images to facilitate website testing 
 in multiple versions of IE, regardless of the host operating system. 
-<del>Unfortunately, setting these virtual machines up without Microsoft's VirtualPC
-can be extremely difficult. The ievms scripts aim to facilitate that process using
-VirtualBox on Linux or OS X.</del> With a single command, you can have IE6, IE7, IE8,
+With a single command, you can have IE6, IE7, IE8,
 IE9, IE10 and IE11 running in separate virtual machines. </p>
-
-<p><strong>NOTE:</strong> As of Feb. 1st, 2013, the <a href="http://www.modern.ie/virtualization-tools">MS images</a>
-are fully compatible with Virtualbox, thanks to the <a href="http://modern.IE">modern.IE</a>
-project.</p>
 
 <p><a href="http://pledgie.com/campaigns/15995"><img src="http://pledgie.com/campaigns/15995.png?skin_name=chrome" alt="Click here to lend your support to ievms and make a donation at pledgie.com!"></a></p>
 
 <h1>
 <a name="quickstart" class="anchor" href="#quickstart"><span class="octicon octicon-link"></span></a>Quickstart</h1>
 
-<p>Just paste this into a terminal: <code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash</code></p>
+<p>Just paste this into a terminal: </p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
+</code></pre>
 
 <h1>
 <a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h1>
 
 <ul>
-<li>VirtualBox (<a href="http://virtualbox.org">http://virtualbox.org</a>)</li>
+<li>VirtualBox (<a href="http://virtualbox.org">http://virtualbox.org</a>), select 'command line utilities' during installation</li>
 <li>Curl (Ubuntu: <code>sudo apt-get install curl</code>)</li>
 <li>Linux Only: unar (Ubuntu: <code>sudo apt-get install unar</code>)</li>
 <li>Patience</li>
-</ul><h2>
+</ul><h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<p><strong>1.)</strong> Install <a href="http://virtualbox.org">VirtualBox</a> and check the <a href="#requirements">Requirements</a></p>
+
+<p><strong>2.)</strong> Download and unpack ievms:</p>
+
+<ul>
+<li>
+<p>To install IE versions 6, 7, 8, 9, 10 and 11 use:</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
+</code></pre>
+</li>
+<li>
+<p>To install specific IE versions (IE7 and IE9 only for example) use:</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9" bash
+</code></pre>
+</li>
+</ul><p><strong>3.)</strong> Launch Virtual Box.</p>
+
+<p><strong>4.)</strong> Choose ievms image from Virtual Box.</p>
+
+<p>The OVA images are massive and can take hours or tens of minutes to 
+download, depending on the speed of your internet connection. You might want
+to start the install and then go catch a movie, or maybe dinner, or both. </p>
+
+<h2>
+<a name="recovering-from-a-failed-installation" class="anchor" href="#recovering-from-a-failed-installation"><span class="octicon octicon-link"></span></a>Recovering from a failed installation</h2>
+
+<p>Each version is installed into <code>~/.ievms/</code> (or <code>INSTALL_PATH</code>). If the installation fails
+for any reason (corrupted download, for instance), delete the appropriate ZIP/ova file
+and rerun the install.</p>
+
+<p>If nothing else, you can delete <code>~/.ievms</code> (or <code>INSTALL_PATH</code>) and rerun the install.</p>
+
+<h2>
+<a name="specifying-the-install-path" class="anchor" href="#specifying-the-install-path"><span class="octicon octicon-link"></span></a>Specifying the install path</h2>
+
+<p>To specify where the VMs are installed, use the <code>INSTALL_PATH</code> variable:</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env INSTALL_PATH="/Path/to/.ievms" bash
+</code></pre>
+
+<h2>
+<a name="passing-additional-options-to-curl" class="anchor" href="#passing-additional-options-to-curl"><span class="octicon octicon-link"></span></a>Passing additional options to curl</h2>
+
+<p>The <code>curl</code> command is passed any options present in the <code>CURL_OPTS</code> 
+environment variable. For example, you can set a download speed limit:</p>
+
+<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env CURL_OPTS="--limit-rate 50k" bash
+</code></pre>
+
+<h2>
 <a name="disk-requirements" class="anchor" href="#disk-requirements"><span class="octicon octicon-link"></span></a>Disk requirements</h2>
 
 <p>A full ievms install will require approximately 48G:</p>
@@ -113,60 +164,6 @@ required climbs to 74G (39G if cleaned post-install) and around 17G will be
 downloaded. Reusing the Win7 VM on the other hand (also the default), saves
 tons of bandwidth but pretty much breaks even on disk space. Disable it with 
 <code>REUSE_WIN7=no</code>.</p>
-
-<h1>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
-
-<ol>
-<li><p>Install VirtualBox (make sure command line utilities are selected and installed).</p></li>
-<li>
-<p>Download and unpack ievms:</p>
-
-<ul>
-<li>
-<p>Install IE versions 6, 7, 8, 9, 10 and 11.</p>
-
-<p>curl -s <a href="https://raw.github.com/xdissent/ievms/master/ievms.sh">https://raw.github.com/xdissent/ievms/master/ievms.sh</a> | bash</p>
-</li>
-<li>
-<p>Install specific IE versions (IE7 and IE9 only for example):</p>
-
-<p>curl -s <a href="https://raw.github.com/xdissent/ievms/master/ievms.sh">https://raw.github.com/xdissent/ievms/master/ievms.sh</a> | env IEVMS_VERSIONS="7 9" bash</p>
-</li>
-</ul>
-</li>
-</ol><ol>
-<li><p>Launch Virtual Box.</p></li>
-<li><p>Choose ievms image from Virtual Box.</p></li>
-</ol><p>The OVA images are massive and can take hours or tens of minutes to 
-download, depending on the speed of your internet connection. You might want
-to start the install and then go catch a movie, or maybe dinner, or both. </p>
-
-<h2>
-<a name="recovering-from-a-failed-installation" class="anchor" href="#recovering-from-a-failed-installation"><span class="octicon octicon-link"></span></a>Recovering from a failed installation</h2>
-
-<p>Each version is installed into <code>~/.ievms/</code> (or <code>INSTALL_PATH</code>). If the installation fails
-for any reason (corrupted download, for instance), delete the appropriate ZIP/ova file
-and rerun the install.</p>
-
-<p>If nothing else, you can delete <code>~/.ievms</code> (or <code>INSTALL_PATH</code>) and rerun the install.</p>
-
-<h2>
-<a name="specifying-the-install-path" class="anchor" href="#specifying-the-install-path"><span class="octicon octicon-link"></span></a>Specifying the install path</h2>
-
-<p>To specify where the VMs are installed, use the <code>INSTALL_PATH</code> variable:</p>
-
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env INSTALL_PATH="/Path/to/.ievms" bash
-</code></pre>
-
-<h2>
-<a name="passing-additional-options-to-curl" class="anchor" href="#passing-additional-options-to-curl"><span class="octicon octicon-link"></span></a>Passing additional options to curl</h2>
-
-<p>The <code>curl</code> command is passed any options present in the <code>CURL_OPTS</code> 
-environment variable. For example, you can set a download speed limit:</p>
-
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env CURL_OPTS="--limit-rate 50k" bash
-</code></pre>
 
 <h1>
 <a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
