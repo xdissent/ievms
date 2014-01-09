@@ -22,7 +22,7 @@ Requirements
 
 * VirtualBox (http://virtualbox.org), select 'command line utilities' during installation
 * Curl (Ubuntu: `sudo apt-get install curl`)
-* Linux Only: unar (Ubuntu: `sudo apt-get install unar`)
+* Linux Only: unar (Ubuntu: `sudo apt-get install unar`) OR 7zip (Ubuntu: `sudo apt-get install p7zip-full`)
 * Patience
 
 
