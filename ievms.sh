@@ -364,8 +364,8 @@ build_ievm() {
         
         for opt in "${!vm_opts[@]}"
         do
-		    log "Modifying ${vm} with: ${opt} ${vm_opts[$opt]}"
-		    VBoxManage modifyvm "${vm}" "${opt}" "${vm_opts[$opt]}"
+	    log "Modifying ${vm} with: ${opt} ${vm_opts[$opt]}"
+	    BoxManage modifyvm "${vm}" "${opt}" "${vm_opts[$opt]}"
         done
 
         log "Building ${vm} VM"
