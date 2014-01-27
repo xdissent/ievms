@@ -32,6 +32,10 @@ guest_user="IEUser"
 # The VM user password to use for guest control.
 guest_pass="Passw0rd!"
 
+# Specify addititional vm opts: VM_OPTS="[--vram]=64 [--cpus]=2"
+declare -A vm_opts
+eval "vm_opts=(${VM_OPTS:-""})"
+
 # ## Utilities
 
 # Print a message to the console.
@@ -357,6 +361,12 @@ build_ievm() {
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
         log "Creating ${vm} VM (disk: ${disk_path})"
         VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
+        
+        for opt in "${!vm_opts[@]}"
+        do
+		    log "Modifying ${vm} with: ${opt} ${vm_opts[$opt]}"
+		    VBoxManage modifyvm "${vm}" "${opt}" "${vm_opts[$opt]}"
+        done
 
         log "Building ${vm} VM"
         declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
