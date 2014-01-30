@@ -111,7 +111,7 @@ check_version() {
 # Check for the VirtualBox Extension Pack and install if not found.
 check_ext_pack() {
     log "Checking for Oracle VM VirtualBox Extension Pack"
-    if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack"
+    if !(VBoxManage list extpacks | grep -q "Oracle VM VirtualBox Extension Pack")
     then
         check_version
         local archive="Oracle_VM_VirtualBox_Extension_Pack-${major_minor_release}.vbox-extpack"
