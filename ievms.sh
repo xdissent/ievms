@@ -124,25 +124,25 @@ check_ext_pack() {
     fi
 }
 
-# Download and install `unar` from Google Code.
-install_unar() {
-    local url="http://theunarchiver.googlecode.com/files/unar1.5.zip"
+# Download and install `unrar` from Google Code.
+install_unrar() {
+    local url="http://theunrarchiver.googlecode.com/files/unrar1.5.zip"
     local archive=`basename "${url}"`
 
-    download "unar" "${url}" "${archive}"
+    download "unrar" "${url}" "${archive}"
 
     unzip "${archive}" || fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/, unzip command returned error code $?"
 
-    hash unar 2>&- || fail "Could not find unar in ${ievms_home}"
+    hash unrar 2>&- || fail "Could not find unrar in ${ievms_home}"
 }
 
-# Check for the `unar` command, downloading and installing it if not found.
-check_unar() {
+# Check for the `unrar` command, downloading and installing it if not found.
+check_unrar() {
     if [ "${kernel}" == "Darwin" ]
     then
-        hash unar 2>&- || install_unar
+        hash unrar 2>&- || install_unrar
     else
-        hash unar 2>&- || fail "Linux support requires unar (sudo apt-get install for Ubuntu/Debian)"
+        hash unrar 2>&- || fail "Linux support requires unrar (sudo apt-get install for Ubuntu/Debian)"
     fi
 }
 
@@ -348,7 +348,7 @@ build_ievm() {
         download "OVA ZIP" "${url}" "${archive}"
 
         log "Extracting OVA from ${ievms_home}/${archive}"
-        unar "${archive}" || fail "Failed to extract ${archive} to ${ievms_home}/${ova}, unar command returned error code $?"
+        unrar "${archive}" || fail "Failed to extract ${archive} to ${ievms_home}/${ova}, unrar command returned error code $?"
     fi
 
     log "Checking for existing ${vm} VM"
@@ -426,7 +426,7 @@ check_system
 create_home
 check_virtualbox
 check_ext_pack
-check_unar
+check_unrar
 
 # Install each requested virtual machine sequentially.
 all_versions="6 7 8 9 10 11"
