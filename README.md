@@ -22,7 +22,7 @@ Requirements
 
 * VirtualBox (http://virtualbox.org), select 'command line utilities' during installation
 * Curl (Ubuntu: `sudo apt-get install curl`; Arch Linux: `pacman -S curl`)
-* Linux Only: unar (Ubuntu: `sudo apt-get install unar`; Arch Linux: `yaourt -S unarchiver`)
+* Linux Only: unar (Ubuntu: `sudo apt-get install unar`; Arch Linux: `yaourt -S unarchiver`, or your preferred way of getting and installing aur/unarchiver)
 * Patience
 
 
@@ -31,7 +31,7 @@ Installation
 
 **1.)** Install [VirtualBox](http://virtualbox.org) and check the [Requirements](#requirements)
 
-   * Arch Linux: `pacman -S vertualbox virtualbox-host-modules virtualbox-guest-iso`
+   * Arch Linux: `pacman -S virtualbox virtualbox-host-modules virtualbox-guest-iso`
 
 **2.)** Download and unpack ievms:
 
