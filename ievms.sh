@@ -68,6 +68,16 @@ create_home() {
     mv -f ./ova/IE*/IE*.{ova,zip} "${ievms_home}/" 2>/dev/null || true
 }
 
+# MacOS X does not have Guest Additions support
+# http://www.virtualbox.org/manual/ch14.html
+has_guest_control_additions() {
+    if [ "${kernel}" == "Darwin" ]; then
+	HAS_GUEST_ADDITIONS="no"
+    else
+	HAS_GUEST_ADDITIONS="yes"
+   fi
+}
+
 # Check for a supported host system (Linux/OS X).
 check_system() {
     kernel=`uname -s`
@@ -75,6 +85,7 @@ check_system() {
         Darwin|Linux) ;;
         *) fail "Sorry, $kernel is not supported." ;;
     esac
+    has_guest_control_additions
 }
 
 # Ensure VirtualBox is installed and `VBoxManage` is on the `PATH`.
@@ -241,30 +252,37 @@ guest_control_exec() {
 # Start an XP virtual machine and set the password for the guest user.
 set_xp_password() {
     start_vm "${1}"
-    wait_for_guestcontrol "${1}"
 
-    log "Setting ${guest_user} password"
-    VBoxManage guestcontrol "${1}" exec --image "net.exe" --username \
-        Administrator --password "${guest_pass}" --wait-exit -- \
-        user "${guest_user}" "${guest_pass}"
+    if [ "${HAS_GUEST_ADDITIONS}" == "yes" ]; then
+	wait_for_guestcontrol "${1}"
 
-    log "Setting auto logon password"
-    VBoxManage guestcontrol "${1}" exec --image "reg.exe" --username \
-        Administrator --password "${guest_pass}" --wait-exit -- add \
-        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
-        /f /v DefaultPassword /t REG_SZ /d "${guest_pass}"
+	log "Setting ${guest_user} password"
+	VBoxManage guestcontrol "${1}" exec --image "net.exe" --username \
+            Administrator --password "${guest_pass}" --wait-exit -- \
+            user "${guest_user}" "${guest_pass}"
 
-    log "Enabling auto admin logon"
-    VBoxManage guestcontrol "${1}" exec --image "reg.exe" --username \
-        Administrator --password "${guest_pass}" --wait-exit -- add \
-        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
-        /f /v AutoAdminLogon /t REG_SZ /d 1
+	log "Setting auto logon password"
+	VBoxManage guestcontrol "${1}" exec --image "reg.exe" --username \
+            Administrator --password "${guest_pass}" --wait-exit -- add \
+            "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
+            /f /v DefaultPassword /t REG_SZ /d "${guest_pass}"
+
+	log "Enabling auto admin logon"
+	VBoxManage guestcontrol "${1}" exec --image "reg.exe" --username \
+            Administrator --password "${guest_pass}" --wait-exit -- add \
+            "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
+            /f /v AutoAdminLogon /t REG_SZ /d 1
+   fi
 }
 
 # Shutdown an XP virtual machine and wait for it to power off.
 shutdown_xp() {
     log "Shutting down ${1}"
-    guest_control_exec "${1}" "shutdown.exe" /s /f /t 0
+    if [ "${HAS_GUEST_ADDITIONS}" == "yes" ]; then
+	guest_control_exec "${1}" "shutdown.exe" /s /f /t 0
+    else
+	VBoxManage controlvm "${1}" poweroff
+    fi
     wait_for_shutdown "${1}"
 }
 
@@ -274,12 +292,16 @@ install_ie_xp() { # vm url
     local src=`basename "${2}"`
     local dest="/Documents and Settings/${guest_user}/Desktop/${src}"
 
-    download "${src}" "${2}" "${src}"
-    copy_to_vm "${1}" "${src}" "${dest}"
+    if [ "${HAS_GUEST_ADDITIONS}" == "yes" ]; then
+	download "${src}" "${2}" "${src}"
+	copy_to_vm "${1}" "${src}" "${dest}"
 
-    log "Installing IE" # Always "fails"
-    guest_control_exec "${1}" "${dest}" /passive /norestart || true
-
+	log "Installing IE" # Always "fails"
+	guest_control_exec "${1}" "${dest}" /passive /norestart || true
+    else
+	echo "You will need to install ${2} manually."
+    fi
+	
     shutdown_xp "${1}"
 }
 
@@ -291,16 +313,18 @@ install_ie_win7() { # vm url
 
     download "${src}" "${2}" "${src}"
     start_vm "${1}"
-    wait_for_guestcontrol "${1}"
-    copy_to_vm "${1}" "${src}" "${dest}"
 
-    log "Installing IE"
-    guest_control_exec "${1}" "cmd.exe" /c \
-        "echo ${dest} /passive /norestart >C:\\Users\\${guest_user}\\ievms.bat"
-    guest_control_exec "${1}" "cmd.exe" /c \
-        "echo shutdown.exe /s /f /t 0 >>C:\\Users\\${guest_user}\\ievms.bat"
-    guest_control_exec "${1}" "schtasks.exe" /run /tn ievms
+    if [ "${HAS_GUEST_ADDITIONS}" == "yes" ]; then
+	wait_for_guestcontrol "${1}"
+	copy_to_vm "${1}" "${src}" "${dest}"
 
+	log "Installing IE"
+	guest_control_exec "${1}" "cmd.exe" /c \
+            "echo ${dest} /passive /norestart >C:\\Users\\${guest_user}\\ievms.bat"
+	guest_control_exec "${1}" "cmd.exe" /c \
+            "echo shutdown.exe /s /f /t 0 >>C:\\Users\\${guest_user}\\ievms.bat"
+	guest_control_exec "${1}" "schtasks.exe" /run /tn ievms
+    fi
     wait_for_shutdown "${1}"
 }
 
@@ -311,7 +335,7 @@ build_ievm() {
     case $1 in
         6|7|8)
             os="WinXP"
-            if [ "${reuse_xp}" != "yes" ]
+            if [[ "${reuse_xp}" != "yes" || "${HAS_GUEST_ADDITIONS}" == "no" ]]
             then
                 if [ "$1" == "6" ]; then unit="10"; fi
                 if [ "$1" == "7" ]; then os="Vista"; fi
@@ -323,7 +347,7 @@ build_ievm() {
             ;;
         9) os="Win7" ;;
         10|11)
-            if [ "${reuse_win7}" != "yes" ]
+            if [[ "${reuse_win7}" != "yes" || "${HAS_GUEST_ADDITIONS}" == "no" ]]
             then
                 if [ "$1" == "11" ]; then fail "IE11 is only available if REUSE_WIN7 is set"; fi
                 os="Win8"

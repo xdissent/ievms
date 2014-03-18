@@ -178,7 +178,6 @@ environment variable `REUSE_XP` to anything other than `yes`:
 
     curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env REUSE_XP="no" bash
 
-
 Reusing Win7 VMs
 ----------------
 
@@ -197,6 +196,14 @@ variable `REUSE_WIN7` to anything other than `yes`:
 
 **NOTE:** It is currently impossible to install IE11 **without** reusing the
 Win7 virtual machine.
+
+Reuse Limitations
+-----------------
+
+Currently, VirtualBox guest control is not supported on MacOS X 
+(http://www.virtualbox.org/manual/ch14.html).  The script will
+ignore the REUSE_WINXP/REUSE_WIN7 variables in this siutation.
+
 
 
 Control ISO
