@@ -200,10 +200,15 @@ Win7 virtual machine.
 Reuse Limitations
 -----------------
 
-Currently, VirtualBox guest control is not supported on MacOS X 
-(http://www.virtualbox.org/manual/ch14.html).  The script will
-ignore the REUSE_WINXP/REUSE_WIN7 variables in this siutation.
-
+Currently, VirtualBox guest control is not supported on MacOS X
+(http://www.virtualbox.org/manual/ch14.html), which prevents the
+script from being able to install the specific browser version
+automatically.  If you wish to use the REUSE_WINXP/REUSE_WIN7 options,
+you will asked to confirm using this option.  Virtual images will be
+created but you may be instructed to install the version after the VM
+has been setup.  For instance, if you wish to use IE7 on Windows XP,
+the image will be created but you will need to download the browser
+version with the URL provided.
 
 
 Control ISO

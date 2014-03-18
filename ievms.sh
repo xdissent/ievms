@@ -75,7 +75,7 @@ has_guest_control_additions() {
 	HAS_GUEST_ADDITIONS="no"
     else
 	HAS_GUEST_ADDITIONS="yes"
-   fi
+    fi 
 }
 
 # Check for a supported host system (Linux/OS X).
@@ -86,6 +86,20 @@ check_system() {
         *) fail "Sorry, $kernel is not supported." ;;
     esac
     has_guest_control_additions
+
+    if [[ "${HAS_GUEST_ADDITIONS}" == "no" && ("${reuse_xp}" == "yes" || "${reuse_win7}" == "yes") ]] 
+    then
+	echo -n "You are running an operating system that does not support VirtualBox guest control additions.  If you reuse the VMs, you will need to install the browser version manually with the link provided.  Still reuse? [y/N]? "
+	read -n 1 still_reuse
+	echo ""
+	still_reuse=`echo $still_reuse | awk '{print toupper($0)}'`
+	if [ "${still_reuse}" != "Y" ]; then
+	    reuse_xp="no"
+	    reuse_win7="no"
+	fi
+	exit
+    fi
+
 }
 
 # Ensure VirtualBox is installed and `VBoxManage` is on the `PATH`.
@@ -335,7 +349,7 @@ build_ievm() {
     case $1 in
         6|7|8)
             os="WinXP"
-            if [[ "${reuse_xp}" != "yes" || "${HAS_GUEST_ADDITIONS}" == "no" ]]
+            if [ "${reuse_xp}" != "yes" ]
             then
                 if [ "$1" == "6" ]; then unit="10"; fi
                 if [ "$1" == "7" ]; then os="Vista"; fi
@@ -347,7 +361,7 @@ build_ievm() {
             ;;
         9) os="Win7" ;;
         10|11)
-            if [[ "${reuse_win7}" != "yes" || "${HAS_GUEST_ADDITIONS}" == "no" ]]
+            if [ "${reuse_win7}" != "yes" ]
             then
                 if [ "$1" == "11" ]; then fail "IE11 is only available if REUSE_WIN7 is set"; fi
                 os="Win8"
