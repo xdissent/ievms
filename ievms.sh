@@ -96,9 +96,8 @@ check_system() {
 	if [ "${still_reuse}" != "Y" ]; then
 	    reuse_xp="no"
 	    reuse_win7="no"
-	fi
-	exit
-    fi
+	fi 
+   fi
 
 }
 
@@ -338,7 +337,10 @@ install_ie_win7() { # vm url
 	guest_control_exec "${1}" "cmd.exe" /c \
             "echo shutdown.exe /s /f /t 0 >>C:\\Users\\${guest_user}\\ievms.bat"
 	guest_control_exec "${1}" "schtasks.exe" /run /tn ievms
+    else 
+	VBoxManage controlvm "${1}" poweroff
     fi
+
     wait_for_shutdown "${1}"
 }
 
