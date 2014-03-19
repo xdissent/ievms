@@ -231,11 +231,13 @@ boot_ievms() {
 # `boot_ievms`, the next boot will attempt automatically install guest additions
 # if present in the drive. It will shut itself down after installation.
 boot_auto_ga() {
-    boot_ievms "${1}"
-    attach "${1}" "additions" "Guest Additions"
-    start_vm "${1}"
-    wait_for_shutdown "${1}"
-    eject "${1}" "Guest Additions"
+    if [ "${HAS_GUEST_ADDITIONS}" == "yes" ]; then
+	boot_ievms "${1}"
+	attach "${1}" "additions" "Guest Additions"
+	start_vm "${1}"
+	wait_for_shutdown "${1}"
+	eject "${1}" "Guest Additions"
+    fi
 }
 
 # Start a virtual machine in headless mode.
