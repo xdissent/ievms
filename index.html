@@ -43,7 +43,7 @@ IE9, IE10 and IE11 running in separate virtual machines. </p>
 
 <p>Just paste this into a terminal: </p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
+<pre><code>curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | bash
 </code></pre>
 
 <h1>
@@ -65,13 +65,13 @@ IE9, IE10 and IE11 running in separate virtual machines. </p>
 <li>
 <p>To install IE versions 6, 7, 8, 9, 10 and 11 use:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | bash
+<pre><code>curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | bash
 </code></pre>
 </li>
 <li>
 <p>To install specific IE versions (IE7 and IE9 only for example) use:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9" bash
+<pre><code>curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9" bash
 </code></pre>
 </li>
 </ul><p><strong>3.)</strong> Launch Virtual Box.</p>
@@ -96,7 +96,7 @@ and rerun the install.</p>
 
 <p>To specify where the VMs are installed, use the <code>INSTALL_PATH</code> variable:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env INSTALL_PATH="/Path/to/.ievms" bash
+<pre><code>curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env INSTALL_PATH="/Path/to/.ievms" bash
 </code></pre>
 
 <h2>
@@ -105,7 +105,7 @@ and rerun the install.</p>
 <p>The <code>curl</code> command is passed any options present in the <code>CURL_OPTS</code> 
 environment variable. For example, you can set a download speed limit:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env CURL_OPTS="--limit-rate 50k" bash
+<pre><code>curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env CURL_OPTS="--limit-rate 50k" bash
 </code></pre>
 
 <h2>
@@ -204,7 +204,7 @@ includes the updated browser version.</p>
 <p><strong>NOTE:</strong> If you'd like to disable XP VM reuse for IE7 and IE8, set the 
 environment variable <code>REUSE_XP</code> to anything other than <code>yes</code>:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | env REUSE_XP="no" bash
+<pre><code>curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env REUSE_XP="no" bash
 </code></pre>
 
 <h2>
@@ -220,7 +220,7 @@ be successfully "rearmed" to extend the activation period.</p>
 <p><strong>NOTE:</strong> If you'd like to disable Win7 VM reuse for IE10, set the environment 
 variable <code>REUSE_WIN7</code> to anything other than <code>yes</code>:</p>
 
-<pre><code>curl -s https://raw.github.com/xdissent/ievms/master/ievms.sh | REUSE_WIN7="no" bash
+<pre><code>curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | REUSE_WIN7="no" bash
 </code></pre>
 
 <p><strong>NOTE:</strong> It is currently impossible to install IE11 <strong>without</strong> reusing the
