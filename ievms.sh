@@ -47,7 +47,7 @@ download() {
         log "Found ${1} at ${3} - skipping download"
     else
         log "Downloading ${1} from ${2} to ${3}"
-        curl ${curl_opts} -L "${2}" -o "${3}" || fail "Failed to download ${2} to ${ievms_home}/${3} using 'curl', error code ($?)"
+        (curl ${curl_opts} -L "${2}" -o "${3}.download" && mv "${3}.download" "${3}") || (rm "${3}.download" ; fail "Failed to download ${2} to ${ievms_home}/${3} using 'curl', error code ($?)")
     fi
 }
 
