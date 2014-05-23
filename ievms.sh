@@ -283,6 +283,22 @@ install_ie_xp() { # vm url
     shutdown_xp "${1}"
 }
 
+
+# Install Windows Update Agent
+install_xp_wua() {
+    local url="http://download.windowsupdate.com/v7/windowsupdate/redist/standalone/WindowsUpdateAgent30-x86.exe"
+    local src=`basename "${url}"`
+    local dest="/Documents and Settings/${guest_user}/Desktop/${src}"
+
+    download "${src}" "${url}" "${src}"
+    copy_to_vm "${1}" "${src}" "${dest}"
+
+    log "Installing Windows Update Agent" # Always "fails"
+    guest_control_exec "${1}" "${dest}" /wuforce /quiet || true
+
+  #  shutdown_xp "${1}"    
+}
+
 # Install an alternative version of IE in a Win7 virtual machine. Downloads the
 # installer, copies it to the vm, then runs it before shutting down.
 install_ie_win7() { # vm url
@@ -382,6 +398,7 @@ build_ievm_ie7() {
         boot_auto_ga "IE7 - Vista"
     else
         set_xp_password "IE7 - WinXP"
+        install_xp_wua "IE7 - WinXP"
         install_ie_xp "IE7 - WinXP" "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe"
     fi
 }
@@ -393,6 +410,7 @@ build_ievm_ie8() {
         boot_auto_ga "IE8 - Win7"
     else
         set_xp_password "IE8 - WinXP"
+        install_xp_wua "IE8 - WinXP"
         install_ie_xp "IE8 - WinXP" "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe"
     fi
 }
