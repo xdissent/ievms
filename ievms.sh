@@ -72,7 +72,10 @@ create_home() {
 check_system() {
     kernel=`uname -s`
     case $kernel in
-        Darwin|Linux) ;;
+        Darwin) OS="OSX"
+            ;;
+        Linux) OS="Linux"
+            ;;
         *) fail "Sorry, $kernel is not supported." ;;
     esac
 }
@@ -340,8 +343,8 @@ build_ievm() {
     archive=${archive:-$def_archive}
     unit=${unit:-"11"}
     local ova=`basename "${archive/_/ - }" .zip`.ova
-    local url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
-    
+    local url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/${OS}/${archive}"
+
     log "Checking for existing OVA at ${ievms_home}/${ova}"
     if [[ ! -f "${ova}" ]]
     then
@@ -363,7 +366,7 @@ build_ievm() {
 
         log "Tagging VM with ievms version"
         VBoxManage setextradata "${vm}" "ievms" "{\"version\":\"${ievms_version}\"}"
-        
+
         log "Creating clean snapshot"
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
     fi
