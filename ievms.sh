@@ -40,15 +40,50 @@ log()  { printf "$*\n" ; return $? ; }
 # Print an error message to the console and bail out of the script.
 fail() { log "\nERROR: $*\n" ; exit 1 ; }
 
+check_md5() {
+    local md5
+
+    case $kernel in
+        Darwin) md5=`md5 "${1}" | rev | cut -c-32 | rev` ;;
+        Linux) md5=`md5sum "${1}" | cut -c-32` ;;
+    esac
+
+    if [ "${md5}" != "${2}" ]
+    then
+        log "MD5 check failed for ${1} (wanted ${2}, got ${md5})"
+        return 1
+    fi
+
+    log "MD5 check succeeded for ${1}"
+}
+
 # Download a URL to a local file. Accepts a name, URL and file.
-download() {
+download() { # name url path md5
+    local attempt=${5:-"0"}
+    local max=${6:-"3"}
+
+    let attempt+=1
+
     if [[ -f "${3}" ]]
     then
         log "Found ${1} at ${3} - skipping download"
-    else
-        log "Downloading ${1} from ${2} to ${3}"
-        curl ${curl_opts} -L "${2}" -o "${3}" || fail "Failed to download ${2} to ${ievms_home}/${3} using 'curl', error code ($?)"
+        check_md5 "${3}" "${4}" && return 0
+        log "Check failed - redownloading ${1}"
+        rm -f "${3}"
     fi
+
+    log "Downloading ${1} from ${2} to ${3} (attempt ${attempt} of ${max})"
+    curl ${curl_opts} -L "${2}" -o "${3}" || fail "Failed to download ${2} to ${ievms_home}/${3} using 'curl', error code ($?)"
+    check_md5 "${3}" "${4}" && return 0
+
+    if [ "${attempt}" == "${max}" ]
+    then
+        echo "Failed to download ${2} to ${ievms_home}/${3} (attempt ${attempt} of ${max})"
+        return 1
+    fi
+
+    log "Redownloading ${1}"
+    download "${1}" "${2}" "${3}" "${4}" "${attempt}" "${max}"
 }
 
 # ## General Setup
@@ -116,8 +151,10 @@ check_ext_pack() {
         check_version
         local archive="Oracle_VM_VirtualBox_Extension_Pack-${major_minor_release}.vbox-extpack"
         local url="http://download.virtualbox.org/virtualbox/${major_minor_release}/${archive}"
+        local md5s="https://www.virtualbox.org/download/hashes/${major_minor_release}/MD5SUMS"
+        local md5=`curl ${curl_opts} -L "${md5s}" | grep "${archive}" | cut -c-32`
 
-        download "Oracle VM VirtualBox Extension Pack" "${url}" "${archive}"
+        download "Oracle VM VirtualBox Extension Pack" "${url}" "${archive}" "${md5}"
 
         log "Installing Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}"
         VBoxManage extpack install "${archive}" || fail "Failed to install Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}, error code ($?)"
@@ -129,7 +166,7 @@ install_unar() {
     local url="http://theunarchiver.googlecode.com/files/unar1.5.zip"
     local archive=`basename "${url}"`
 
-    download "unar" "${url}" "${archive}"
+    download "unar" "${url}" "${archive}" "fbf544d1332c481d7d0f4e3433fbe53b"
 
     unzip "${archive}" || fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/, unzip command returned error code $?"
 
@@ -173,7 +210,7 @@ find_iso() {
         iso=$dev_iso
     else
         iso="${ievms_home}/ievms-control-${ievms_version}.iso"
-        download "ievms control ISO" "${url}" "${iso}"
+        download "ievms control ISO" "${url}" "${iso}" "6699cb421fc2f56e854fd3f5e143e84c"
     fi
 }
 
@@ -270,11 +307,11 @@ shutdown_xp() {
 
 # Install an alternative version of IE in an XP virtual machine. Downloads the
 # installer, copies it to the vm, then runs it before shutting down.
-install_ie_xp() { # vm url
+install_ie_xp() { # vm url md5
     local src=`basename "${2}"`
     local dest="/Documents and Settings/${guest_user}/Desktop/${src}"
 
-    download "${src}" "${2}" "${src}"
+    download "${src}" "${2}" "${src}" "${3}"
     copy_to_vm "${1}" "${src}" "${dest}"
 
     log "Installing IE" # Always "fails"
@@ -285,11 +322,11 @@ install_ie_xp() { # vm url
 
 # Install an alternative version of IE in a Win7 virtual machine. Downloads the
 # installer, copies it to the vm, then runs it before shutting down.
-install_ie_win7() { # vm url
+install_ie_win7() { # vm url md5
     local src=`basename "${2}"`
     local dest="/Users/${guest_user}/Desktop/${src}"
 
-    download "${src}" "${2}" "${src}"
+    download "${src}" "${2}" "${src}" "${3}"
     start_vm "${1}"
     wait_for_guestcontrol "${1}"
     copy_to_vm "${1}" "${src}" "${dest}"
@@ -341,11 +378,20 @@ build_ievm() {
     unit=${unit:-"11"}
     local ova=`basename "${archive/_/ - }" .zip`.ova
     local url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
+
+    local md5
+    case $archive in
+        IE6_WinXP.zip) md5="3d5b7d980296d048de008d28305ca224" ;;
+        IE7_Vista.zip) md5="d5269b2220f5c7fb9786dad513f2c05a" ;;
+        IE8_Win7.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
+        IE9_Win7.zip) md5="58d201fe7dc7e890ad645412264f2a2c" ;;
+        IE10_Win8.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
+    esac
     
     log "Checking for existing OVA at ${ievms_home}/${ova}"
     if [[ ! -f "${ova}" ]]
     then
-        download "OVA ZIP" "${url}" "${archive}"
+        download "OVA ZIP" "${url}" "${archive}" "${md5}"
 
         log "Extracting OVA from ${ievms_home}/${archive}"
         unar "${archive}" || fail "Failed to extract ${archive} to ${ievms_home}/${ova}, unar command returned error code $?"
@@ -382,7 +428,7 @@ build_ievm_ie7() {
         boot_auto_ga "IE7 - Vista"
     else
         set_xp_password "IE7 - WinXP"
-        install_ie_xp "IE7 - WinXP" "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe"
+        install_ie_xp "IE7 - WinXP" "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe" "ea16789f6fc1d2523f704e8f9afbe906"
     fi
 }
 
@@ -393,7 +439,7 @@ build_ievm_ie8() {
         boot_auto_ga "IE8 - Win7"
     else
         set_xp_password "IE8 - WinXP"
-        install_ie_xp "IE8 - WinXP" "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe"
+        install_ie_xp "IE8 - WinXP" "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe" "616c2e8b12aaa349cd3acb38bf581700"
     fi
 }
 
@@ -409,14 +455,14 @@ build_ievm_ie10() {
         boot_auto_ga "IE10 - Win8"
     else
         boot_auto_ga "IE10 - Win7"
-        install_ie_win7 "IE10 - Win7" "http://download.microsoft.com/download/8/A/C/8AC7C482-BC74-492E-B978-7ED04900CEDE/IE10-Windows6.1-x86-en-us.exe"
+        install_ie_win7 "IE10 - Win7" "http://download.microsoft.com/download/8/A/C/8AC7C482-BC74-492E-B978-7ED04900CEDE/IE10-Windows6.1-x86-en-us.exe" "0f14b2de0b3cef611b9c1424049e996b"
     fi
 }
 
 # Build the IE11 virtual machine, reusing the Win7 VM always.
 build_ievm_ie11() {
     boot_auto_ga "IE11 - Win7"
-    install_ie_win7 "IE11 - Win7" "http://download.microsoft.com/download/9/2/F/92FC119C-3BCD-476C-B425-038A39625558/IE11-Windows6.1-x86-en-us.exe"
+    install_ie_win7 "IE11 - Win7" "http://download.microsoft.com/download/9/2/F/92FC119C-3BCD-476C-B425-038A39625558/IE11-Windows6.1-x86-en-us.exe" "7d3479b9007f3c0670940c1b10a3615f"
 }
 
 # ## Main Entry Point
