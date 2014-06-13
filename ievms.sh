@@ -9,7 +9,7 @@ set -o pipefail
 # ## Gobal Variables
 
 # The ievms version.
-ievms_version="0.2.0"
+ievms_version="0.2.1"
 
 # Options passed to each `curl` command.
 curl_opts=${CURL_OPTS:-""}
