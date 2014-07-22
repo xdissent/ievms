@@ -198,6 +198,12 @@ variable `REUSE_WIN7` to anything other than `yes`:
 **NOTE:** It is currently impossible to install IE11 **without** reusing the
 Win7 virtual machine.
 
+VM Users and Passwords
+------------
+
+- IEUser
+- `Passw0rd!` per [guest_pass in ievms.sh](https://github.com/xdissent/ievms/blob/master/ievms.sh#L33) and confirmed in [vboxga.bat](https://github.com/xdissent/ievms/blob/master/control/vboxga.bat#L9)
+
 
 Control ISO
 -----------
