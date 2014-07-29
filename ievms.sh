@@ -6,7 +6,7 @@ set -o errtrace
 set -o errexit
 set -o pipefail
 
-# ## Gobal Variables
+# ## Global Variables
 
 # The ievms version.
 ievms_version="0.2.1"
