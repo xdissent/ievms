@@ -404,6 +404,13 @@ build_ievm() {
         log "Creating ${vm} VM (disk: ${disk_path})"
         VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
 
+        log "Ensuring video memory (vram) at minimum of 64MB"
+        local current_vram=$(VBoxManage showvminfo "${vm}" --machinereadable | grep ^vram= | sed -e 's/vram=//')
+        if [ "$current_vram" -lt 64 ]
+        then
+            VBoxManage modifyvm "${vm}" --vram 64
+        fi
+
         log "Building ${vm} VM"
         declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
 
