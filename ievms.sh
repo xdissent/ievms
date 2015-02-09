@@ -14,6 +14,9 @@ ievms_version="0.2.1"
 # Options passed to each `curl` command.
 curl_opts=${CURL_OPTS:-""}
 
+# Disable hardware virtualization
+disable_hwv=${DISABLE_HWV:-"no"}
+
 # Reuse XP virtual machines for IE versions that are supported.
 reuse_xp=${REUSE_XP:-"yes"}
 
@@ -403,6 +406,10 @@ build_ievm() {
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
         log "Creating ${vm} VM (disk: ${disk_path})"
         VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
+        if [ "${disable_hwv}" != "no" ]
+        then
+            VBoxManage modifyvm "${vm}" --cpus 1 --hwvirtex off
+        fi
 
         log "Building ${vm} VM"
         declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"

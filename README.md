@@ -68,6 +68,14 @@ To specify where the VMs are installed, use the `INSTALL_PATH` variable:
     curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env INSTALL_PATH="/Path/to/.ievms" bash
 
 
+Disabling hardware virtualization
+---------------------------------
+
+By default VirtualBox enables hardware virtualization (VT-x or AMD-V). If hardware virtualization is not available (e.g. it's disabled in the BIOS), virtual machines will not start. To force software virtualization, set the `DISABLE_HWV` variable:
+
+    curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env DISABLE_HWV="yes" bash
+
+
 Passing additional options to curl
 ----------------------------------
 
