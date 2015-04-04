@@ -126,7 +126,8 @@ check_version() {
     local major_minor="${version%.*}"
     local dl_page=`curl ${curl_opts} -L "http://download.virtualbox.org/virtualbox/" 2>/dev/null`
 
-    if [[ "$version" == *"kernel module is not loaded"* ]]; then
+    if [[ "$version" == *"kernel module is not loaded"*  || \
+          "$version" == *"kernel modules are not loaded"* ]]; then
         fail "$version"
     fi
 
