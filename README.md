@@ -192,7 +192,7 @@ be successfully "rearmed" to extend the activation period.
 **NOTE:** If you'd like to disable Win7 VM reuse for IE10, set the environment 
 variable `REUSE_WIN7` to anything other than `yes`:
 
-    curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | REUSE_WIN7="no" bash
+    curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env REUSE_WIN7="no" bash
 
 
 **NOTE:** It is currently impossible to install IE11 **without** reusing the
