@@ -347,7 +347,7 @@ set_ova() {
         6|7|8)
             if [ "${reuse_xp}" != "yes" ]
             then
-                ova="${1} - ${2}.ova"
+                ova="IE${1} - ${2}.ova"
             else
                 ova="IE6 - WinXP.ova"
             fi
@@ -356,7 +356,7 @@ set_ova() {
         10|11)
             if [ "${reuse_win7}" != "yes" ]
             then
-                ova="${1} - ${2}.ova"
+                ova="IE${1} - ${2}.ova"
             else
                 ova="IE9 - Win7.ova"
             fi
@@ -399,6 +399,7 @@ build_ievm() {
     local vm="IE${1} - ${os}"
     local def_archive="${vm/ - /.}.For.Windows.VirtualBox.zip"
     archive=${archive:-$def_archive}
+    archive=${archive/WinXP/XP} # IE6.XP... instead of IE6.WinXP... (404)
     unit=${unit:-"11"}
     local ova=""
     set_ova ${1} ${os}
@@ -408,10 +409,10 @@ build_ievm() {
     local md5
     case $archive in
         IE6.XP.For.Windows.VirtualBox.zip) md5="1fe27a06c0a8e0cb3ee6d27dfe3c634a" ;;
-        IE7.Vista.For.Windows.VirtualBox.zip) md5="d5269b2220f5c7fb9786dad513f2c05a" ;;
-        IE8.Win7.For.Windows.VirtualBox.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
+        IE7.Vista.For.Windows.VirtualBox.zip) md5="c144a18ea40848f2611036448d598002" ;;
+        IE8.Win7.For.Windows.VirtualBox.zip) md5="86d481f517ca18d50f298fc9fb1c5a18" ;;
         IE9.Win7.For.Windows.VirtualBox.zip) md5="61a2b69a5712abd6566fcbd1f44f7a2b" ;;
-        IE10.Win8.For.Windows.VirtualBox.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
+        IE10.Win8.For.Windows.VirtualBox.zip) md5="caf9fcef0a4ee13a236bdc7bdb9ff1d3" ;;
     esac
 
     log "Checking for existing OVA at ${ievms_home}/${ova}"
