@@ -217,14 +217,15 @@ find_iso() {
 # Attach a dvd image to the virtual machine.
 attach() {
     log "Attaching ${3}"
-    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 1 \
+    VBoxManage storageattach "${1}" --storagectl "IDE" --port 1 \
         --device 0 --type dvddrive --medium "${2}"
 }
 
 # Eject the dvd image from the virtual machine.
 eject() {
     log "Ejecting ${2}"
-    VBoxManage modifyvm "${1}" --dvd none
+    VBoxManage storageattach "${1}" --storagectl "IDE" --port 1 \
+        --device 0 --type dvddrive --medium "emptydrive"
 }
 
 # Boot the virtual machine with the control ISO in the dvd drive then wait for
@@ -341,6 +342,29 @@ install_ie_win7() { # vm url md5
     wait_for_shutdown "${1}"
 }
 
+set_ova() {
+    case $1 in
+        6|7|8)
+            if [ "${reuse_xp}" != "yes" ]
+            then
+                ova="IE${1} - ${2}.ova"
+            else
+                ova="IE6 - WinXP.ova"
+            fi
+            ;;
+        9) ova="IE9 - Win7.ova" ;;
+        10|11)
+            if [ "${reuse_win7}" != "yes" ]
+            then
+                ova="IE${1} - ${2}.ova"
+            else
+                ova="IE9 - Win7.ova"
+            fi
+            ;;
+        *) fail "Invalid IE version: ${1}" ;;
+    esac
+}
+
 # Build an ievms virtual machine given the IE version desired.
 build_ievm() {
     unset archive
@@ -354,7 +378,7 @@ build_ievm() {
                 if [ "$1" == "7" ]; then os="Vista"; fi
                 if [ "$1" == "8" ]; then os="Win7"; fi
             else
-                archive="IE6_WinXP.zip"
+                archive="IE6.XP.For.Windows.VirtualBox.zip"
                 unit="10"
             fi
             ;;
@@ -366,28 +390,31 @@ build_ievm() {
                 os="Win8"
             else
                 os="Win7"
-                archive="IE9_Win7.zip"
+                archive="IE9.Win7.For.Windows.VirtualBox.zip"
             fi
             ;;
         *) fail "Invalid IE version: ${1}" ;;
     esac
 
     local vm="IE${1} - ${os}"
-    local def_archive="${vm/ - /_}.zip"
+    local def_archive="${vm/ - /.}.For.Windows.VirtualBox.zip"
     archive=${archive:-$def_archive}
+    archive=${archive/WinXP/XP} # IE6.XP... instead of IE6.WinXP... (404)
     unit=${unit:-"11"}
-    local ova=`basename "${archive/_/ - }" .zip`.ova
-    local url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
+    local ova=""
+    set_ova ${1} ${os}
+
+    local url="https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE${1}/Windows/${archive}"
 
     local md5
     case $archive in
-        IE6_WinXP.zip) md5="3d5b7d980296d048de008d28305ca224" ;;
-        IE7_Vista.zip) md5="d5269b2220f5c7fb9786dad513f2c05a" ;;
-        IE8_Win7.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
-        IE9_Win7.zip) md5="58d201fe7dc7e890ad645412264f2a2c" ;;
-        IE10_Win8.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
+        IE6.XP.For.Windows.VirtualBox.zip) md5="1fe27a06c0a8e0cb3ee6d27dfe3c634a" ;;
+        IE7.Vista.For.Windows.VirtualBox.zip) md5="c144a18ea40848f2611036448d598002" ;;
+        IE8.Win7.For.Windows.VirtualBox.zip) md5="86d481f517ca18d50f298fc9fb1c5a18" ;;
+        IE9.Win7.For.Windows.VirtualBox.zip) md5="61a2b69a5712abd6566fcbd1f44f7a2b" ;;
+        IE10.Win8.For.Windows.VirtualBox.zip) md5="caf9fcef0a4ee13a236bdc7bdb9ff1d3" ;;
     esac
-    
+
     log "Checking for existing OVA at ${ievms_home}/${ova}"
     if [[ ! -f "${ova}" ]]
     then
@@ -409,7 +436,7 @@ build_ievm() {
 
         log "Tagging VM with ievms version"
         VBoxManage setextradata "${vm}" "ievms" "{\"version\":\"${ievms_version}\"}"
-        
+
         log "Creating clean snapshot"
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
     fi
