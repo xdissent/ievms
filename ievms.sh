@@ -35,7 +35,7 @@ guest_pass="Passw0rd!"
 # ## Utilities
 
 # Print a message to the console.
-log()  { printf "$*\n" ; return $? ; }
+log()  { printf '%s\n' "$*" ; return $? ; }
 
 # Print an error message to the console and bail out of the script.
 fail() { log "\nERROR: $*\n" ; exit 1 ; }
