@@ -322,7 +322,7 @@ install_ie_xp() { # vm url md5
 # installer, copies it to the vm, then runs it before shutting down.
 install_ie_win7() { # vm url md5
     local src=`basename "${2}"`
-    local dest="C:\\Documents and Settings\\${guest_user}\\Desktop\\${src}"
+    local dest="C:\\Users\\${guest_user}\\Desktop\\${src}"
 
     download "${src}" "${2}" "${src}" "${3}"
     start_vm "${1}"
@@ -477,10 +477,10 @@ check_ext_pack
 check_unar
 
 # Install each requested virtual machine sequentially.
-all_versions="6 7 8 9 10 11"
+all_versions="6 7 8 9 10 11 EDGE"
 for ver in ${IEVMS_VERSIONS:-$all_versions}
 do
-    log "Building IE${ver} VM"
+    log "Building IE ${ver} VM"
     build_ievm $ver
 done
 
