@@ -4,7 +4,7 @@ Overview
 Microsoft provides virtual machine disk images to facilitate website testing 
 in multiple versions of IE, regardless of the host operating system. 
 With a single command, you can have IE6, IE7, IE8,
-IE9, IE10 and IE11 running in separate virtual machines. 
+IE9, IE10, IE11 and MSEdge running in separate virtual machines.
 
 [![Click here to lend your support to ievms and make a donation at pledgie.com!](http://pledgie.com/campaigns/15995.png?skin_name=chrome)](http://pledgie.com/campaigns/15995)
 
@@ -20,10 +20,12 @@ Just paste this into a terminal:
 Requirements
 ============
 
-* VirtualBox (http://virtualbox.org), select 'command line utilities' during installation
+* VirtualBox > 5.0 (http://virtualbox.org), select 'command line utilities' during installation
 * Curl (Ubuntu: `sudo apt-get install curl`)
 * Linux Only: unar (Ubuntu: `sudo apt-get install unar`)
 * Patience
+
+**NOTE** Use [ievms version 0.2.1](https://github.com/xdissent/ievms/raw/v0.2.1/ievms.sh) for VirtualBox < 5.0.
 
 
 Installation
@@ -33,13 +35,13 @@ Installation
 
 **2.)** Download and unpack ievms:
 
-   * To install IE versions 6, 7, 8, 9, 10 and 11 use:
+   * To install IE versions 6, 7, 8, 9, 10, 11 and EDGE use:
 
         curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | bash
 
-   * To install specific IE versions (IE7 and IE9 only for example) use:
+   * To install specific IE versions (IE7, IE9 and EDGE only for example) use:
 
-        curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9" bash
+        curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env IEVMS_VERSIONS="7 9 EDGE" bash
 
 **3.)** Launch Virtual Box.
 
@@ -80,7 +82,7 @@ environment variable. For example, you can set a download speed limit:
 Disk requirements
 -----------------
 
-A full ievms install will require approximately 48G:
+A full ievms install will require approximately 69G:
 
     Servo:.ievms xdissent$ du -ch *
      11G    IE10 - Win7-disk1.vmdk
@@ -97,18 +99,21 @@ A full ievms install will require approximately 48G:
      11G    IE9 - Win7-disk1.vmdk
     4.7G    IE9 - Win7.ova
     4.7G    IE9_Win7.zip
-    3.4M    ievms-control-0.1.0.iso
+     10G    MSEdge - Win10-disk1.vmdk
+    5.1G    MSEdge - Win10.ova
+    5.0G    MSEdge_Win10.zip
+    3.4M    ievms-control-0.3.0.iso
     4.6M    lsar
     4.5M    unar
     4.1M    unar1.5.zip
-     48G    total
+     69G    total
    
 You may remove all files except `*.vmdk` after installation and they will be
 re-downloaded if ievms is run again in the future:
 
     $ find ~/.ievms -type f ! -name "*.vmdk" -exec rm {} \;
 
-If all installation related files are removed, around 37G is required:
+If all installation related files are removed, around 47G is required:
 
     Servo:.ievms xdissent$ du -ch *
      11G    IE10 - Win7-disk1.vmdk
@@ -117,17 +122,18 @@ If all installation related files are removed, around 37G is required:
     1.6G    IE7 - WinXP-disk1.vmdk
     1.6G    IE8 - WinXP-disk1.vmdk
      11G    IE9 - Win7-disk1.vmdk
-     37G    total
+     10G    MSEdge - Win10-disk1.vmdk
+     47G    total
 
 
 Bandwidth requirements
 ----------------------
 
-A full installation will download roughly 7.5G of data.
+A full installation will download roughly 12.5G of data.
 
 **NOTE:** Reusing the XP VM for IE7 and IE8 (the default) saves an incredible
 amount of space and bandwidth. If it is disabled (`REUSE_XP=no`) the disk space
-required climbs to 74G (39G if cleaned post-install) and around 17G will be 
+required climbs to 95G (49G if cleaned post-install) and around 22G will be
 downloaded. Reusing the Win7 VM on the other hand (also the default), saves
 tons of bandwidth but pretty much breaks even on disk space. Disable it with 
 `REUSE_WIN7=no`.

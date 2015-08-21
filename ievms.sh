@@ -343,6 +343,8 @@ install_ie_win7() { # vm url md5
 build_ievm() {
     unset archive
     unset unit
+    local prefix="IE"
+    local version="${1}"
     case $1 in
         6|7|8)
             os="WinXP"
@@ -367,15 +369,28 @@ build_ievm() {
                 archive="IE9_Win7.zip"
             fi
             ;;
+        EDGE)
+            prefix="MS"
+            version="Edge"
+            os="Win10"
+            unit="8"
+            ;;
         *) fail "Invalid IE version: ${1}" ;;
     esac
 
-    local vm="IE${1} - ${os}"
+    local vm="${prefix}${version} - ${os}"
     local def_archive="${vm/ - /_}.zip"
     archive=${archive:-$def_archive}
     unit=${unit:-"11"}
     local ova=`basename "${archive/_/ - }" .zip`.ova
-    local url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
+
+    local url
+    if [ "${os}" == "Win10" ]
+    then
+        url="https://az792536.vo.msecnd.net/vms/VMBuild_20150801/VirtualBox/MSEdge/Mac/Microsoft%20Edge.Win10.For.Mac.VirtualBox.zip"
+    else
+        url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
+    fi
 
     local md5
     case $archive in
@@ -384,6 +399,7 @@ build_ievm() {
         IE8_Win7.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
         IE9_Win7.zip) md5="58d201fe7dc7e890ad645412264f2a2c" ;;
         IE10_Win8.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
+        MSEdge_Win10.zip) md5="c1011b491d49539975fb4c3eeff16dae" ;;
     esac
     
     log "Checking for existing OVA at ${ievms_home}/${ova}"
@@ -477,10 +493,10 @@ check_ext_pack
 check_unar
 
 # Install each requested virtual machine sequentially.
-all_versions="6 7 8 9 10 11"
+all_versions="6 7 8 9 10 11 EDGE"
 for ver in ${IEVMS_VERSIONS:-$all_versions}
 do
-    log "Building IE${ver} VM"
+    log "Building IE ${ver} VM"
     build_ievm $ver
 done
 
