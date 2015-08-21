@@ -5,7 +5,6 @@ set -o nounset
 set -o errtrace
 set -o errexit
 set -o pipefail
-set -x
 
 # ## Global Variables
 
