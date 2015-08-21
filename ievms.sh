@@ -9,7 +9,7 @@ set -o pipefail
 # ## Global Variables
 
 # The ievms version.
-ievms_version="0.2.1"
+ievms_version="0.3.0"
 
 # Options passed to each `curl` command.
 curl_opts=${CURL_OPTS:-""}
@@ -257,22 +257,20 @@ start_vm() {
     VBoxManage startvm "${1}" --type headless
 }
 
-# Copy a file to the virtual machine. An optional password will be used
-# if given.
+# Copy a file to the virtual machine from the ievms home folder.
 copy_to_vm() {
     log "Copying ${2} to ${3}"
-    VBoxManage guestcontrol "${1}" cp "${ievms_home}/${2}" "${3}" \
-        --username "${guest_user}" --password "${guest_pass}"
+    guest_control_exec "${1}" cmd.exe /c copy "E:\\${2}" "${3}"
 }
 
 # Execute a command with arguments on a virtual machine.
 guest_control_exec() {
     local vm="${1}"
     local image="${2}"
-    shift; shift
-    VBoxManage guestcontrol "${vm}" exec --image "${image}" \
+    shift
+    VBoxManage guestcontrol "${vm}" run \
         --username "${guest_user}" --password "${guest_pass}" \
-        --wait-exit -- "$@"
+        --exe "${image}" -- "$@"
 }
 
 # Start an XP virtual machine and set the password for the guest user.
@@ -281,19 +279,19 @@ set_xp_password() {
     wait_for_guestcontrol "${1}"
 
     log "Setting ${guest_user} password"
-    VBoxManage guestcontrol "${1}" exec --image "net.exe" --username \
-        Administrator --password "${guest_pass}" --wait-exit -- \
-        user "${guest_user}" "${guest_pass}"
+    VBoxManage guestcontrol "${1}" run --username Administrator \
+        --password "${guest_pass}" --exe "net.exe" -- \
+        net.exe user "${guest_user}" "${guest_pass}"
 
     log "Setting auto logon password"
-    VBoxManage guestcontrol "${1}" exec --image "reg.exe" --username \
-        Administrator --password "${guest_pass}" --wait-exit -- add \
+    VBoxManage guestcontrol "${1}" run --username Administrator \
+        --password "${guest_pass}" --exe "reg.exe" -- reg.exe add \
         "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
         /f /v DefaultPassword /t REG_SZ /d "${guest_pass}"
 
     log "Enabling auto admin logon"
-    VBoxManage guestcontrol "${1}" exec --image "reg.exe" --username \
-        Administrator --password "${guest_pass}" --wait-exit -- add \
+    VBoxManage guestcontrol "${1}" run --username Administrator \
+        --password "${guest_pass}" --exe "reg.exe" -- reg.exe add \
         "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
         /f /v AutoAdminLogon /t REG_SZ /d 1
 }
@@ -309,7 +307,7 @@ shutdown_xp() {
 # installer, copies it to the vm, then runs it before shutting down.
 install_ie_xp() { # vm url md5
     local src=`basename "${2}"`
-    local dest="/Documents and Settings/${guest_user}/Desktop/${src}"
+    local dest="C:\\Documents and Settings\\${guest_user}\\Desktop\\${src}"
 
     download "${src}" "${2}" "${src}" "${3}"
     copy_to_vm "${1}" "${src}" "${dest}"
@@ -324,7 +322,7 @@ install_ie_xp() { # vm url md5
 # installer, copies it to the vm, then runs it before shutting down.
 install_ie_win7() { # vm url md5
     local src=`basename "${2}"`
-    local dest="/Users/${guest_user}/Desktop/${src}"
+    local dest="C:\\Users\\${guest_user}\\Desktop\\${src}"
 
     download "${src}" "${2}" "${src}" "${3}"
     start_vm "${1}"
@@ -403,6 +401,10 @@ build_ievm() {
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
         log "Creating ${vm} VM (disk: ${disk_path})"
         VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
+
+        log "Adding shared folder"
+        VBoxManage sharedfolder add "${vm}" --automount --name ievms \
+            --hostpath "${ievms_home}"
 
         log "Building ${vm} VM"
         declare -F "build_ievm_ie${1}" && "build_ievm_ie${1}"
