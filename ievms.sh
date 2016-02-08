@@ -485,7 +485,7 @@ build_ievm_ie11() {
 }
 
 # Build the Edge virtual machine
-build_ievm_ieedge() {
+build_ievm_ieEDGE() {
     boot_auto_ga "MSEdge - Win10"
 }
 
