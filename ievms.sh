@@ -370,8 +370,8 @@ build_ievm() {
             fi
             ;;
         EDGE)
-            prefix="MS"
-            version="Edge"
+            prefix="IE"
+            version="11"
             os="Win10"
             unit="8"
             ;;
@@ -387,7 +387,8 @@ build_ievm() {
     local url
     if [ "${os}" == "Win10" ]
     then
-        url="https://az792536.vo.msecnd.net/vms/VMBuild_20150801/VirtualBox/MSEdge/Mac/Microsoft%20Edge.Win10.For.Mac.VirtualBox.zip"
+        vm="MSEdge - Win10"
+        url="https://az792536.vo.msecnd.net/vms/VMBuild_20150801/VirtualBox/MSEdge/Windows/Microsoft%20Edge.Win10.For.Windows.VirtualBox.zip"
     else
         url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
     fi
@@ -399,7 +400,7 @@ build_ievm() {
         IE8_Win7.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
         IE9_Win7.zip) md5="58d201fe7dc7e890ad645412264f2a2c" ;;
         IE10_Win8.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
-        MSEdge_Win10.zip) md5="c1011b491d49539975fb4c3eeff16dae" ;;
+        IE11_Win10.zip) md5="2a591bd4e59c8fc1ca9818c31b99666b" ;;
     esac
     
     log "Checking for existing OVA at ${ievms_home}/${ova}"
@@ -481,6 +482,11 @@ build_ievm_ie10() {
 build_ievm_ie11() {
     boot_auto_ga "IE11 - Win7"
     install_ie_win7 "IE11 - Win7" "http://download.microsoft.com/download/9/2/F/92FC119C-3BCD-476C-B425-038A39625558/IE11-Windows6.1-x86-en-us.exe" "7d3479b9007f3c0670940c1b10a3615f"
+}
+
+# Build the Edge virtual machine
+build_ievm_ieEDGE() {
+    boot_auto_ga "MSEdge - Win10"
 }
 
 # ## Main Entry Point
