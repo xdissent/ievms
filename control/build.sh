@@ -21,19 +21,19 @@ install_packages() {
 }
 
 download_cross_compiler() {
-  url="http://landley.net/aboriginal/downloads/binaries/cross-compiler-i686.tar.bz2"
+  url="http://landley.net/code/firmware/downloads/binaries/cross-compiler-i686.tar.gz"
   archive=`basename "${url}"`
   log "Downloading cross compiler archive from ${url} to ${ievms_home}/${archive}"
   if [[ ! -e "${archive}" ]] && ! curl -L "${url}" -o "${archive}"
   then
     fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
   fi
-}
+}  
 
 extract_cross_compiler() {
-  cross_compiler=`basename "${archive}" .tar.bz2`
+  cross_compiler=`basename "${archive}" .tar.gz`
   log "Extracting cross compiler archive from ${archive} to ${ievms_home}/${cross_compiler}"
-  if [[ ! -e "${cross_compiler}" ]] && ! tar -jxf "${archive}"
+  if [[ ! -e "${cross_compiler}" ]] && ! tar -xzf "${archive}"
   then
     fail "Failed to extract ${archive} to ${ievms_home}/${cross_compiler} using 'tar', error code ($?)"
   fi
