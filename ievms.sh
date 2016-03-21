@@ -370,8 +370,9 @@ build_ievm() {
             fi
             ;;
         EDGE)
-            prefix="MS"
-            version="Edge"
+            #prefix="MS"
+            #version="Edge"
+            version="11"
             os="Win10"
             unit="8"
             ;;
