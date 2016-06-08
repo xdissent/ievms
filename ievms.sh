@@ -372,7 +372,7 @@ build_ievm() {
         EDGE)
             prefix="MS"
             version="Edge"
-            os="Win10"
+            os="Win10TH2"
             unit="8"
             ;;
         *) fail "Invalid IE version: ${1}" ;;
@@ -385,9 +385,9 @@ build_ievm() {
     local ova=`basename "${archive/_/ - }" .zip`.ova
 
     local url
-    if [ "${os}" == "Win10" ]
+    if [ "${os}" == "Win10TH2" ]
     then
-        url="https://az792536.vo.msecnd.net/vms/VMBuild_20150801/VirtualBox/MSEdge/Mac/Microsoft%20Edge.Win10.For.Mac.VirtualBox.zip"
+        url="https://az792536.vo.msecnd.net/vms/VMBuild_20160322/VirtualBox/MSEdge/MSEdge.Win10TH2.VirtualBox.zip"
     else
         url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
     fi
@@ -399,7 +399,7 @@ build_ievm() {
         IE8_Win7.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
         IE9_Win7.zip) md5="58d201fe7dc7e890ad645412264f2a2c" ;;
         IE10_Win8.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
-        MSEdge_Win10.zip) md5="c1011b491d49539975fb4c3eeff16dae" ;;
+        MSEdge_Win10TH2.zip) md5="4002ca8238181312a1f4dab04632a2c1" ;;
     esac
     
     log "Checking for existing OVA at ${ievms_home}/${ova}"
