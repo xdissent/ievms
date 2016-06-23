@@ -64,6 +64,8 @@ download() { # name url path md5
 
     let attempt+=1
 
+    echo "${3}"
+
     if [[ -f "${3}" ]]
     then
         log "Found ${1} at ${3} - skipping download"
@@ -384,10 +386,11 @@ build_ievm() {
     unit=${unit:-"11"}
     local ova=`basename "${archive/_/ - }" .zip`.ova
 
+
     local url
     if [ "${os}" == "Win10" ]
     then
-        url="https://az792536.vo.msecnd.net/vms/VMBuild_20150801/VirtualBox/MSEdge/Mac/Microsoft%20Edge.Win10.For.Mac.VirtualBox.zip"
+        url="https://az792536.vo.msecnd.net/vms/VMBuild_20160322/VirtualBox/MSEdge/MSEdge.Win10TH2.VirtualBox.zip"
     else
         url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
     fi
@@ -399,7 +402,7 @@ build_ievm() {
         IE8_Win7.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
         IE9_Win7.zip) md5="58d201fe7dc7e890ad645412264f2a2c" ;;
         IE10_Win8.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
-        MSEdge_Win10.zip) md5="c1011b491d49539975fb4c3eeff16dae" ;;
+        MSEdge_Win10.zip) md5="4002ca8238181312a1f4dab04632a2c1" ;;
     esac
     
     log "Checking for existing OVA at ${ievms_home}/${ova}"
@@ -408,13 +411,24 @@ build_ievm() {
         download "OVA ZIP" "${url}" "${archive}" "${md5}"
 
         log "Extracting OVA from ${ievms_home}/${archive}"
-        unar "${archive}" || fail "Failed to extract ${archive} to ${ievms_home}/${ova}, unar command returned error code $?"
+        unar "${archive}"  || fail "Failed to extract ${archive} to ${ievms_home}/${ova}, unar command returned error code $?"
+    fi
+
+    # I don't know of better way to normalize the names
+    # The bash is weak in this one
+    if [[ -f "MSEdge - Win10TH2.ova" ]]
+    then
+        mv "MSEdge - Win10TH2.ova" "MSEdge - Win10.ova"
     fi
 
     log "Checking for existing ${vm} VM"
     if ! VBoxManage showvminfo "${vm}" >/dev/null 2>/dev/null
     then
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
+
+        echo VBoxManage import \"${ova}\" --vsys 0 --vmname \"${vm}\" --unit \"${unit}\" --disk \"${disk_path}\"
+        echo $(pwd)
+
         log "Creating ${vm} VM (disk: ${disk_path})"
         VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
 
