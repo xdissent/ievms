@@ -415,7 +415,7 @@ build_ievm() {
     fi
 
     # I don't know of better way to normalize the names
-    # The bash is weak in this on
+    # The bash is weak in this one
     if [[ -f "MSEdge - Win10TH2.ova" ]]
     then
         mv "MSEdge - Win10TH2.ova" "MSEdge - Win10.ova"
