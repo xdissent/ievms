@@ -388,6 +388,7 @@ build_ievm() {
     if [ "${os}" == "Win10" ]
     then
         url="https://az792536.vo.msecnd.net/vms/VMBuild_20160802/VirtualBox/MSEdge/MSEdge.Win10_RS1.VirtualBox.zip"
+        ova="MSEdge - Win10_preview.ova"
     else
         url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
     fi
