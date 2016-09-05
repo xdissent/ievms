@@ -387,7 +387,8 @@ build_ievm() {
     local url
     if [ "${os}" == "Win10" ]
     then
-        url="https://az792536.vo.msecnd.net/vms/VMBuild_20150801/VirtualBox/MSEdge/Mac/Microsoft%20Edge.Win10.For.Mac.VirtualBox.zip"
+        url="https://az792536.vo.msecnd.net/vms/VMBuild_20160802/VirtualBox/MSEdge/MSEdge.Win10_RS1.VirtualBox.zip"
+        ova="MSEdge - Win10_preview.ova"
     else
         url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
     fi
@@ -399,7 +400,7 @@ build_ievm() {
         IE8_Win7.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
         IE9_Win7.zip) md5="58d201fe7dc7e890ad645412264f2a2c" ;;
         IE10_Win8.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
-        MSEdge_Win10.zip) md5="c1011b491d49539975fb4c3eeff16dae" ;;
+        MSEdge_Win10.zip) md5="467d8286cb8cbed90f0761c3566abdda" ;;
     esac
     
     log "Checking for existing OVA at ${ievms_home}/${ova}"
@@ -473,7 +474,7 @@ build_ievm_ie10() {
         boot_auto_ga "IE10 - Win8"
     else
         boot_auto_ga "IE10 - Win7"
-        install_ie_win7 "IE10 - Win7" "http://download.microsoft.com/download/8/A/C/8AC7C482-BC74-492E-B978-7ED04900CEDE/IE10-Windows6.1-x86-en-us.exe" "0f14b2de0b3cef611b9c1424049e996b"
+        install_ie_win7 "IE10 - Win7" "http://download.digiex.net/Apps/InternetExplorer/IE10-Windows6.1-x86-en-us.exe" "0f14b2de0b3cef611b9c1424049e996b"
     fi
 }
 
