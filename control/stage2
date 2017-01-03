@@ -14,7 +14,9 @@ fi
 
 if [ -d /disk/WINDOWS ]
 then
-  reged -IC /disk/WINDOWS/system32/config/system HKEY_LOCAL_MACHINE\\SYSTEM /scripts/xp.reg
+  reged -IC /disk/WINDOWS/system32/config/software HKEY_LOCAL_MACHINE\\SOFTWARE /scripts/xpsw.reg
+  reged -IC /disk/Documents\ and\ Settings/IEUser/NTUSER.DAT HKEY_USERS\\S-1-5-21-776561741-308236825-1417001333-1003 /scripts/xpusr.reg
+  cp /scripts/xpvboxga.bat /disk/Documents\ and\ Settings/All\ Users/Start\ Menu/Programs/Startup/
 else
   reged -IC /disk/Windows/System32/config/SOFTWARE HKEY_LOCAL_MACHINE\\SOFTWARE /scripts/deuac.reg
 
@@ -25,6 +27,7 @@ else
     cp /scripts/vboxga.bat /disk/ProgramData/Microsoft/Windows/Start\ Menu/Programs/StartUp/
   fi
 
+  cp /scripts/vsint.cer /disk/vsint.cer
   cp /scripts/reuac.reg /disk/reuac.reg
   cp /scripts/ievms.xml /disk/ievms.xml
   cp /scripts/ievms.bat /disk/ievms.bat

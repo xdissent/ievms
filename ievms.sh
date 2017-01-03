@@ -9,7 +9,7 @@ set -o pipefail
 # ## Global Variables
 
 # The ievms version.
-ievms_version="0.3.1"
+ievms_version="0.3.2"
 
 # Options passed to each `curl` command.
 curl_opts=${CURL_OPTS:-""}
@@ -163,10 +163,10 @@ check_ext_pack() {
 
 # Download and install `unar` from Google Code.
 install_unar() {
-    local url="http://theunarchiver.googlecode.com/files/unar1.5.zip"
+    local url="http://unarchiver.c3.cx/downloads/unar1.10.1.zip"
     local archive=`basename "${url}"`
 
-    download "unar" "${url}" "${archive}" "fbf544d1332c481d7d0f4e3433fbe53b"
+    download "unar" "${url}" "${archive}" "d548661e4b6c33512074df81e39ed874"
 
     unzip "${archive}" || fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/, unzip command returned error code $?"
 
@@ -188,7 +188,7 @@ wait_for_shutdown() {
     while true ; do
         log "Waiting for ${1} to shutdown..."
         sleep "${sleep_wait}"
-        VBoxManage showvminfo "${1}" | grep "State:" | grep -q "powered off" && return 0 || true
+        VBoxManage showvminfo "${1}" | grep "State:" | grep -q "powered off" && sleep "${sleep_wait}" && return 0 || true
     done
 }
 
@@ -210,7 +210,7 @@ find_iso() {
         iso=$dev_iso
     else
         iso="${ievms_home}/ievms-control-${ievms_version}.iso"
-        download "ievms control ISO" "${url}" "${iso}" "6699cb421fc2f56e854fd3f5e143e84c"
+        download "ievms control ISO" "${url}" "${iso}" "1fe3f95e0731bbcba949564cf9bbe28a"
     fi
 }
 
@@ -344,6 +344,7 @@ build_ievm() {
     unset archive
     unset unit
     local prefix="IE"
+    local suffix=""
     local version="${1}"
     case $1 in
         6|7|8)
@@ -371,6 +372,7 @@ build_ievm() {
             ;;
         EDGE)
             prefix="MS"
+            suffix="_preview"
             version="Edge"
             os="Win10"
             unit="8"
@@ -382,14 +384,14 @@ build_ievm() {
     local def_archive="${vm/ - /_}.zip"
     archive=${archive:-$def_archive}
     unit=${unit:-"11"}
-    local ova=`basename "${archive/_/ - }" .zip`.ova
+    local ova="`basename "${archive/_/ - }" .zip`${suffix}.ova"
 
     local url
     if [ "${os}" == "Win10" ]
     then
-        url="https://az792536.vo.msecnd.net/vms/VMBuild_20150801/VirtualBox/MSEdge/Mac/Microsoft%20Edge.Win10.For.Mac.VirtualBox.zip"
+        url="https://az792536.vo.msecnd.net/vms/VMBuild_20160802/VirtualBox/MSEdge/MSEdge.Win10_RS1.VirtualBox.zip"
     else
-        url="http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
+        url="https://az412801.vo.msecnd.net/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
     fi
 
     local md5
@@ -399,9 +401,9 @@ build_ievm() {
         IE8_Win7.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
         IE9_Win7.zip) md5="58d201fe7dc7e890ad645412264f2a2c" ;;
         IE10_Win8.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
-        MSEdge_Win10.zip) md5="c1011b491d49539975fb4c3eeff16dae" ;;
+        MSEdge_Win10.zip) md5="467d8286cb8cbed90f0761c3566abdda" ;;
     esac
-    
+
     log "Checking for existing OVA at ${ievms_home}/${ova}"
     if [[ ! -f "${ova}" ]]
     then
@@ -427,7 +429,7 @@ build_ievm() {
 
         log "Tagging VM with ievms version"
         VBoxManage setextradata "${vm}" "ievms" "{\"version\":\"${ievms_version}\"}"
-        
+
         log "Creating clean snapshot"
         VBoxManage snapshot "${vm}" take clean --description "The initial VM state"
     fi
@@ -435,6 +437,7 @@ build_ievm() {
 
 # Build the IE6 virtual machine.
 build_ievm_ie6() {
+    boot_auto_ga "IE6 - WinXP"
     set_xp_password "IE6 - WinXP"
     shutdown_xp "IE6 - WinXP"
 }
@@ -445,6 +448,7 @@ build_ievm_ie7() {
     then
         boot_auto_ga "IE7 - Vista"
     else
+        boot_auto_ga "IE7 - WinXP"
         set_xp_password "IE7 - WinXP"
         install_ie_xp "IE7 - WinXP" "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe" "ea16789f6fc1d2523f704e8f9afbe906"
     fi
@@ -456,6 +460,7 @@ build_ievm_ie8() {
     then
         boot_auto_ga "IE8 - Win7"
     else
+        boot_auto_ga "IE8 - WinXP"
         set_xp_password "IE8 - WinXP"
         install_ie_xp "IE8 - WinXP" "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe" "616c2e8b12aaa349cd3acb38bf581700"
     fi
@@ -473,7 +478,7 @@ build_ievm_ie10() {
         boot_auto_ga "IE10 - Win8"
     else
         boot_auto_ga "IE10 - Win7"
-        install_ie_win7 "IE10 - Win7" "http://download.microsoft.com/download/8/A/C/8AC7C482-BC74-492E-B978-7ED04900CEDE/IE10-Windows6.1-x86-en-us.exe" "0f14b2de0b3cef611b9c1424049e996b"
+        install_ie_win7 "IE10 - Win7" "https://raw.githubusercontent.com/kbandla/installers/master/MSIE/IE10-Windows6.1-x86-en-us.exe" "0f14b2de0b3cef611b9c1424049e996b"
     fi
 }
 
