@@ -21,7 +21,7 @@ install_packages() {
 }
 
 download_cross_compiler() {
-  url="http://landley.net/aboriginal/downloads/binaries/cross-compiler-i686.tar.bz2"
+  url="http://landley.net/aboriginal/downloads/binaries/cross-compiler-i686.tar.gz"
   archive=`basename "${url}"`
   log "Downloading cross compiler archive from ${url} to ${ievms_home}/${archive}"
   if [[ ! -e "${archive}" ]] && ! curl -L "${url}" -o "${archive}"
@@ -31,9 +31,9 @@ download_cross_compiler() {
 }
 
 extract_cross_compiler() {
-  cross_compiler=`basename "${archive}" .tar.bz2`
+  cross_compiler=`basename "${archive}" .tar.gz`
   log "Extracting cross compiler archive from ${archive} to ${ievms_home}/${cross_compiler}"
-  if [[ ! -e "${cross_compiler}" ]] && ! tar -jxf "${archive}"
+  if [[ ! -e "${cross_compiler}" ]] && ! tar -zxf "${archive}"
   then
     fail "Failed to extract ${archive} to ${ievms_home}/${cross_compiler} using 'tar', error code ($?)"
   fi
@@ -46,7 +46,7 @@ download_kernel() {
   if [[ ! -e "${archive}" ]] && ! curl -L "${url}" -o "${archive}"
   then
     fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
-  fi  
+  fi
 }
 
 extract_kernel() {
@@ -55,7 +55,7 @@ extract_kernel() {
   if [[ ! -e "${kernel_src}" ]] && ! tar -jxf "${archive}"
   then
     fail "Failed to extract ${archive} to ${ievms_home}/${kernel_src} using 'tar', error code ($?)"
-  fi  
+  fi
 }
 
 configure_kernel() {
@@ -82,7 +82,7 @@ download_iso() {
   if [[ ! -e "${archive}" ]] && ! curl -L "${url}" -o "${archive}"
   then
     fail "Failed to download ${url} to ${ievms_home}/${archive} using 'curl', error code ($?)"
-  fi  
+  fi
 }
 
 extract_iso() {
@@ -91,7 +91,7 @@ extract_iso() {
   if [[ ! -e "${iso}" ]] && ! unzip "${archive}"
   then
     fail "Failed to extract ${archive} to ${ievms_home}/${iso} using 'unzip', error code ($?)"
-  fi  
+  fi
 }
 
 unpack_iso() {
@@ -118,10 +118,13 @@ extract_initrd() {
 copy_scripts() {
   log "Copying scripts"
   cp "/vagrant/control/stage2" "${initrd}/scripts/"
-  cp "/vagrant/control/xp.reg" "${initrd}/scripts/"
+  cp "/vagrant/control/xpsw.reg" "${initrd}/scripts/"
+  cp "/vagrant/control/xpusr.reg" "${initrd}/scripts/"
+  cp "/vagrant/control/xpvboxga.bat" "${initrd}/scripts/"
   cp "/vagrant/control/deuac.reg" "${initrd}/scripts/"
   cp "/vagrant/control/reuac.reg" "${initrd}/scripts/"
   cp "/vagrant/control/vboxga.bat" "${initrd}/scripts/"
+  cp "/vagrant/control/vsint.cer" "${initrd}/scripts/"
   cp "/vagrant/control/ievms.xml" "${initrd}/scripts/"
   cp "/vagrant/control/ievms.bat" "${initrd}/scripts/"
   cp "/vagrant/control/isolinux.cfg" "${remaster_iso}/isolinux.cfg"
@@ -143,7 +146,7 @@ compress_initrd() {
 pack_iso() {
   iso_out="/vagrant/ievms-control.iso"
   log "Packing ievms ISO from ${remaster_iso} to ${iso_out}"
-  if ! genisoimage -o "${iso_out}" -b isolinux.bin -c boot.cat -p "ievms" -no-emul-boot -boot-load-size 4 -boot-info-table -V "IEVMS" -cache-inodes -r -J -l -joliet-long "${remaster_iso}" 
+  if ! genisoimage -o "${iso_out}" -b isolinux.bin -c boot.cat -p "ievms" -no-emul-boot -boot-load-size 4 -boot-info-table -V "IEVMS" -cache-inodes -r -J -l -joliet-long "${remaster_iso}"
   then
     fail "Failed to pack ${remaster_iso} to ${iso_out} using 'genisoimage', error code ($?)"
   fi

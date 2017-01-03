@@ -1,6 +1,7 @@
 cd /d D:\
 cd \cert
-VBoxCertUtil.exe add-trusted-publisher oracle-vbox.cer --root oracle-vbox.cer
+VBoxCertUtil.exe add-trusted-publisher vbox-sha1.cer --root C:\vsint.cer
+del C:\vsint.cer
 cd \
 VBoxWindowsAdditions.exe /S
 regedit.exe /S C:\reuac.reg
