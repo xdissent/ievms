@@ -9,7 +9,7 @@ set -o pipefail
 # ## Global Variables
 
 # The ievms version.
-ievms_version="0.3.2"
+ievms_version="0.3.3"
 
 # Options passed to each `curl` command.
 curl_opts=${CURL_OPTS:-""}
@@ -203,7 +203,7 @@ wait_for_guestcontrol() {
 
 # Find or download the ievms control ISO.
 find_iso() {
-    local url="https://dl.dropboxusercontent.com/u/463624/ievms-control-${ievms_version}.iso"
+    local url="https://github.com/xdissent/ievms/releases/download/v${ievms_version}/ievms-control.iso"
     local dev_iso="${orig_cwd}/ievms-control.iso" # Use local iso if in ievms dev root
     if [[ -f "${dev_iso}" ]]
     then
