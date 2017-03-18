@@ -183,6 +183,17 @@ check_unar() {
     fi
 }
 
+confirm_remove_file() {
+    local file_to_remove=$1
+    echo "${file_to_remove} already exists...remove? [y/N]"
+    read -n 1 remove_file
+    remove_file=`echo $remove_file | awk '{print toupper($0)}'`
+    if [ "${remove_file}" == "Y" ]
+    then
+	rm "${file_to_remove}"
+    fi 
+}
+
 # Pause execution until the virtual machine with a given name shuts down.
 wait_for_shutdown() {
     while true ; do
@@ -417,6 +428,18 @@ build_ievm() {
     if ! VBoxManage showvminfo "${vm}" >/dev/null 2>/dev/null
     then
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
+	if [ -e "${disk_path}" ]
+	then
+	    confirm_remove_file "${disk_path}"
+	fi
+
+	local vmbox_path="$HOME/VirtualBox VMs/${vm}/${vm}.vbox"
+	if [ -e "${vmbox_path}" ]
+	then
+	    echo "Warning! You may need to go to VirtualBox File -> Virtual Media Manager and remove this VM from the registry manually."
+	    confirm_remove_file "${vmbox_path}"
+	fi
+
         log "Creating ${vm} VM (disk: ${disk_path})"
         VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
 
