@@ -88,6 +88,23 @@ download() { # name url path md5
 
 # ## General Setup
 
+# Parse command-line options. Currently only --gui is supported.
+parse_opts() {
+    vbox_headless=true
+
+    while (( "$#" )); do
+        case "${1}" in
+            '--gui')
+                vbox_headless=false
+                ;;
+            *)
+                fail "invalid option: ${1}"
+                ;;
+        esac
+        shift
+    done
+}
+
 # Create the ievms home folder and `cd` into it. The `INSTALL_PATH` env variable
 # is used to determine the full path. The home folder is then added to `PATH`.
 create_home() {
@@ -251,10 +268,14 @@ boot_auto_ga() {
     eject "${1}" "Guest Additions"
 }
 
-# Start a virtual machine in headless mode.
+# Start a virtual machine
 start_vm() {
     log "Starting VM ${1}"
-    VBoxManage startvm "${1}" --type headless
+    if [ "$vbox_headless" = true ] ; then
+        VBoxManage startvm "${1}" --type headless
+    else
+        VBoxManage startvm "${1}"
+    fi
 }
 
 # Copy a file to the virtual machine from the ievms home folder.
@@ -489,6 +510,8 @@ build_ievm_ie11() {
 }
 
 # ## Main Entry Point
+
+parse_opts "$@"
 
 # Run through all checks to get the host ready for installation.
 check_system
