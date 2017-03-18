@@ -78,6 +78,13 @@ environment variable. For example, you can set a download speed limit:
 
     curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env CURL_OPTS="--limit-rate 50k" bash
 
+Passing additional VM parameters
+--------------------------------
+
+Additional VM parameters can be passed using the `VM_OPTS` variable:
+
+    curl -s .../ievms.sh | env VM_OPTS="[--vram]=64 [--cpus]=2 [--memory]=1024" bash 
+
 
 Disk requirements
 -----------------
