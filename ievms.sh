@@ -43,6 +43,8 @@ fail() { log "\nERROR: $*\n" ; exit 1 ; }
 check_md5() {
     local md5
 
+    log "Running MD5 check for ${1}"
+
     case $kernel in
         Darwin) md5=`md5 "${1}" | rev | cut -c-32 | rev` ;;
         Linux) md5=`md5sum "${1}" | cut -c-32` ;;
