@@ -173,13 +173,13 @@ install_unar() {
     hash unar 2>&- || fail "Could not find unar in ${ievms_home}"
 }
 
-# Check for the `unar` command, downloading and installing it if not found.
-check_unar() {
+# Check for the `unar` command on Mac, downloading and installing it if not found, or 7z on Linux.
+check_unarchiver() {
     if [ "${kernel}" == "Darwin" ]
     then
         hash unar 2>&- || install_unar
     else
-        hash unar 2>&- || fail "Linux support requires unar (sudo apt-get install for Ubuntu/Debian)"
+        hash unar 2>&- || hash 7za 2>&- || fail "Linux support requires unar or 7za (sudo apt-get install for Ubuntu/Debian)"
     fi
 }
 
@@ -410,7 +410,22 @@ build_ievm() {
         download "OVA ZIP" "${url}" "${archive}" "${md5}"
 
         log "Extracting OVA from ${ievms_home}/${archive}"
-        unar "${archive}" || fail "Failed to extract ${archive} to ${ievms_home}/${ova}, unar command returned error code $?"
+        unarchiver_command=unar
+        if [ "${kernel}" == "Darwin" ]
+        then
+            unar "${archive}"
+        elif hash unar 2>&-
+        then
+            unar "${archive}"
+        else
+            unarchiver_command=7z
+            7za e "${archive}"
+        fi
+        if [ "$?" != "0" ]
+        then
+            fail "Failed to extract ${archive} to ${ievms_home}/${ova}," \
+                "${unarchiver_command} command returned error code $?"
+        fi
     fi
 
     log "Checking for existing ${vm} VM"
@@ -495,7 +510,7 @@ check_system
 create_home
 check_virtualbox
 check_ext_pack
-check_unar
+check_unarchiver
 
 # Install each requested virtual machine sequentially.
 all_versions="6 7 8 9 10 11 EDGE"
