@@ -414,7 +414,7 @@ build_ievm() {
     fi
 
     log "Checking for existing ${vm} VM"
-    if ! VBoxManage showvminfo "${vm}" >/dev/null 2>/dev/null
+    if ! `VBoxManage list vms` == *"${vm}"*
     then
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
         log "Creating ${vm} VM (disk: ${disk_path})"
