@@ -157,7 +157,7 @@ check_ext_pack() {
         download "Oracle VM VirtualBox Extension Pack" "${url}" "${archive}" "${md5}"
 
         log "Installing Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}"
-        VBoxManage extpack install "${archive}" || fail "Failed to install Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}, error code ($?)"
+        yes | VBoxManage extpack install "${archive}" || fail "Failed to install Oracle VM VirtualBox Extension Pack from ${ievms_home}/${archive}, error code ($?)"
     fi
 }
 
