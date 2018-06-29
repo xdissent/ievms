@@ -270,51 +270,6 @@ guest_control_exec() {
         --exe "${image}" -- "$@"
 }
 
-# Start an XP virtual machine and set the password for the guest user.
-set_xp_password() {
-    start_vm "${1}"
-    wait_for_guestcontrol "${1}"
-
-    log "Setting ${guest_user} password"
-    VBoxManage guestcontrol "${1}" run --username Administrator \
-        --password "${guest_pass}" --exe "net.exe" -- \
-        net.exe user "${guest_user}" "${guest_pass}"
-
-    log "Setting auto logon password"
-    VBoxManage guestcontrol "${1}" run --username Administrator \
-        --password "${guest_pass}" --exe "reg.exe" -- reg.exe add \
-        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
-        /f /v DefaultPassword /t REG_SZ /d "${guest_pass}"
-
-    log "Enabling auto admin logon"
-    VBoxManage guestcontrol "${1}" run --username Administrator \
-        --password "${guest_pass}" --exe "reg.exe" -- reg.exe add \
-        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
-        /f /v AutoAdminLogon /t REG_SZ /d 1
-}
-
-# Shutdown an XP virtual machine and wait for it to power off.
-shutdown_xp() {
-    log "Shutting down ${1}"
-    guest_control_exec "${1}" "shutdown.exe" /s /f /t 0
-    wait_for_shutdown "${1}"
-}
-
-# Install an alternative version of IE in an XP virtual machine. Downloads the
-# installer, copies it to the vm, then runs it before shutting down.
-install_ie_xp() { # vm url md5
-    local src=`basename "${2}"`
-    local dest="C:\\Documents and Settings\\${guest_user}\\Desktop\\${src}"
-
-    download "${src}" "${2}" "${src}" "${3}"
-    copy_to_vm "${1}" "${src}" "${dest}"
-
-    log "Installing IE" # Always "fails"
-    guest_control_exec "${1}" "${dest}" /passive /norestart || true
-
-    shutdown_xp "${1}"
-}
-
 # Install an alternative version of IE in a Win7 virtual machine. Downloads the
 # installer, copies it to the vm, then runs it before shutting down.
 install_ie_win7() { # vm url md5
@@ -372,7 +327,7 @@ build_ievm() {
     local vm="${browser} - ${os}"
     local def_archive="${vm/ - /_}.zip"
     archive=${archive:-$def_archive}
-    unit=${unit:-"11"}
+    unit=${unit:-"9"}
     local ova="`basename "${archive/_/ - }" .zip`${suffix}.ova"
 
     local build_timestamp
