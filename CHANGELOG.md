@@ -9,7 +9,7 @@ CHANGELOG
 * Updates Windows VM MD5
 * Adds WinXP Mode documentation for Win7
 * Updates the URL and MD5 for The Unarchiver file
-* Fixes BVoxManage import not mounting disk drive
+* Fixes VBoxManage import not mounting disk drive
 
 ## v0.3.3
 

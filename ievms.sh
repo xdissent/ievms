@@ -214,14 +214,15 @@ find_iso() {
 # Attach a dvd image to the virtual machine.
 attach() {
     log "Attaching ${3}"
-    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 1 \
+    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 0 \
         --device 0 --type dvddrive --medium "${2}"
 }
 
 # Eject the dvd image from the virtual machine.
 eject() {
     log "Ejecting ${2}"
-    VBoxManage modifyvm "${1}" --dvd none
+    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 0 \
+        --device 0 --type dvddrive --medium "none" --forceunmount
 }
 
 # Boot the virtual machine with the control ISO in the dvd drive then wait for
@@ -318,7 +319,7 @@ build_ievm() {
             prefix="MS"
             version="Edge"
             os="Win10"
-            unit="8"
+            unit="10"
             ;;
         *) fail "Invalid IE version: ${1}" ;;
     esac
@@ -366,7 +367,8 @@ build_ievm() {
     then
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
         log "Creating ${vm} VM (disk: ${disk_path})"
-        VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
+        VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" \
+            --unit "${unit}" --disk "${disk_path}"
 
         log "Adding shared folder"
         VBoxManage sharedfolder add "${vm}" --automount --name ievms \
