@@ -14,9 +14,6 @@ ievms_version="0.4.0"
 # Options passed to each `curl` command.
 curl_opts=${CURL_OPTS:-""}
 
-# Reuse XP virtual machines for IE versions that are supported.
-reuse_xp=${REUSE_XP:-"yes"}
-
 # Reuse Win7 virtual machines for IE versions that are supported.
 reuse_win7=${REUSE_WIN7:-"yes"}
 
@@ -161,12 +158,12 @@ check_ext_pack() {
     fi
 }
 
-# Download and install `unar` from Google Code.
+# Download and install `unar` from https://theunarchiver.com/ CDN
 install_unar() {
-    local url="http://unarchiver.c3.cx/downloads/unar1.10.1.zip"
+    local url="https://dl.devmate.com/com.macpaw.site.theunarchiver/TheUnarchiver.zip"
     local archive=`basename "${url}"`
 
-    download "unar" "${url}" "${archive}" "d548661e4b6c33512074df81e39ed874"
+    download "unar" "${url}" "${archive}" "606f5f186d6d0661fc5558b628fb3b51"
 
     unzip "${archive}" || fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/, unzip command returned error code $?"
 
@@ -391,14 +388,13 @@ build_ievm() {
     local url="https://az792536.vo.msecnd.net/vms/VMBuild_${build_timestamp}/VirtualBox/${browser}/${browser}.${os}.VirtualBox.zip"
 
     local md5
-    # TODO: get md5 of missing archives once downloaded
     case $archive in
-        IE8_Win7.zip) md5="" ;;
-        IE9_Win7.zip) md5="0e1d3669b426fce8b0d772665f113302" ;;
-        IE10_Win7.zip) md5="21d0dee59fd11bdfce237864ef79063b" ;;
-        IE11_Win7.zip) md5="" ;;
-        IE11_Win81.zip) md5="" ;;
-        MSEdge_Win10.zip) md5="" ;;
+        IE8_Win7.zip)     md5="342e3d2d163f3ce345cfaa9cb5fa8012" ;;
+        IE9_Win7.zip)     md5="0e1d3669b426fce8b0d772665f113302" ;;
+        IE10_Win7.zip)    md5="21d0dee59fd11bdfce237864ef79063b" ;;
+        IE11_Win7.zip)    md5="24675c913c4a74c87dc11f8ccb6c8f9e" ;;
+        IE11_Win81.zip)   md5="896db7a54336982241d25f704f35d6c2" ;;
+        MSEdge_Win10.zip) md5="fdbcfb79d36c6ffd424c9d36a88ddc02" ;;
     esac
 
     log "Checking for existing OVA at ${ievms_home}/${ova}"
@@ -432,7 +428,7 @@ build_ievm() {
     fi
 }
 
-# Build the IE8 virtual machine, reusing the XP VM if requested (the default).
+# Build the IE8 virtual machine.
 build_ievm_ie8() {
     boot_auto_ga "IE8 - Win7"
 }
@@ -442,13 +438,13 @@ build_ievm_ie9() {
     boot_auto_ga "IE9 - Win7"
 }
 
-# Build the IE10 virtual machine, reusing the Win7 VM if requested (the default).
+# Build the IE10 virtual machine.
 build_ievm_ie10() {
     boot_auto_ga "IE10 - Win7"
     install_ie_win7 "IE10 - Win7" "https://raw.githubusercontent.com/kbandla/installers/master/MSIE/IE10-Windows6.1-x86-en-us.exe" "0f14b2de0b3cef611b9c1424049e996b"
 }
 
-# Build the IE11 virtual machine, reusing the Win7 VM always.
+# Build the IE11 virtual machine, reusing the Win7 VM if requested (the default).
 build_ievm_ie11() {
     if [ "${reuse_win7}" != "yes" ]
     then

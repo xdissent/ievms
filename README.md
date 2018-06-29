@@ -169,20 +169,11 @@ command used will automatically attempt to resume where it left off.~~
 Unfortunately, the modern.IE download servers do not support resume.
 
 
-Reusing XP VMs
---------------
+Using Win7 with XP Mode
+-----------------------
 
-IE7 and IE8 ship from MS on Vista and Win7 respectively. Both of these
-images are far larger than the IE6 XP image, which also technically supports
-IE7 and IE8. To save bandwidth, space and time, ievms will reuse
-(duplicate) the IE6 XP VM image for both. Virtualbox guest control is used
-to run the appropriate IE installer within the VM. The `clean` snapshot
-includes the updated browser version.
-
-**NOTE:** If you'd like to disable XP VM reuse for IE7 and IE8, set the
-environment variable `REUSE_XP` to anything other than `yes`:
-
-    curl -s https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh | env REUSE_XP="no" bash
+You can download a copy of Windows XP Mode to run on a Windows 7 machine
+through https://www.microsoft.com/en-us/download/details.aspx?id=8002
 
 
 Reusing Win7 VMs
