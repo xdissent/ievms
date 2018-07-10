@@ -160,10 +160,10 @@ check_ext_pack() {
 
 # Download and install `unar` from https://theunarchiver.com/ CDN
 install_unar() {
-    local url="https://dl.devmate.com/com.macpaw.site.theunarchiver/TheUnarchiver.zip"
+    local url="https://cdn.theunarchiver.com/downloads/unarMac.zip"
     local archive=`basename "${url}"`
 
-    download "unar" "${url}" "${archive}" "606f5f186d6d0661fc5558b628fb3b51"
+    download "unar" "${url}" "${archive}" "91796924b1b21ee586ed904b319bb447"
 
     unzip "${archive}" || fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/, unzip command returned error code $?"
 
