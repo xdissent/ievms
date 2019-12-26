@@ -235,6 +235,7 @@ eject() {
 boot_ievms() {
     find_iso
     attach "${1}" "${iso}" "ievms control ISO"
+    VBoxManage modifyvm "${1}" --boot1 dvd --boot2 disk
     start_vm "${1}"
     wait_for_shutdown "${1}"
     eject "${1}" "ievms control ISO"
