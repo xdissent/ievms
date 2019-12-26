@@ -235,6 +235,7 @@ eject() {
 boot_ievms() {
     find_iso
     attach "${1}" "${iso}" "ievms control ISO"
+    VBoxManage modifyvm "${1}" --boot1 dvd --boot2 disk
     start_vm "${1}"
     wait_for_shutdown "${1}"
     eject "${1}" "ievms control ISO"
@@ -260,7 +261,11 @@ start_vm() {
 # Copy a file to the virtual machine from the ievms home folder.
 copy_to_vm() {
     log "Copying ${2} to ${3}"
-    guest_control_exec "${1}" cmd.exe /c copy "E:\\${2}" "${3}"
+    local dl="Z"
+    if [ "${4}" = "Win10" ]; then
+        dl="D"
+    fi
+    guest_control_exec "${1}" cmd.exe /c copy "${dl}:\\${2}" "${3}"
 }
 
 # Execute a command with arguments on a virtual machine.
@@ -310,7 +315,7 @@ install_ie_xp() { # vm url md5
     local dest="C:\\Documents and Settings\\${guest_user}\\Desktop\\${src}"
 
     download "${src}" "${2}" "${src}" "${3}"
-    copy_to_vm "${1}" "${src}" "${dest}"
+    copy_to_vm "${1}" "${src}" "${dest}" "WinXP"
 
     log "Installing IE" # Always "fails"
     guest_control_exec "${1}" "${dest}" /passive /norestart || true
@@ -327,7 +332,7 @@ install_ie_win7() { # vm url md5
     download "${src}" "${2}" "${src}" "${3}"
     start_vm "${1}"
     wait_for_guestcontrol "${1}"
-    copy_to_vm "${1}" "${src}" "${dest}"
+    copy_to_vm "${1}" "${src}" "${dest}" "Win7"
 
     log "Installing IE"
     guest_control_exec "${1}" "cmd.exe" /c \
