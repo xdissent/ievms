@@ -318,6 +318,24 @@ install_ie_xp() { # vm url md5
     shutdown_xp "${1}"
 }
 
+# Disable UAC on the Win7+ VMs. This is necessary for two reasons:
+# 1) Help malware detonate and get further
+# 2) "Headless" installation of applications/etc. to root system, without always having to
+#    bootstrap it through a scheduled task
+disable_uac_win7() { # vm
+    start_vm "${1}"
+    wait_for_guestcontrol "${1}"
+
+    log "Disabling UAC"
+    guest_control_exec "${1}" "cmd.exe" "/c" "echo reg.exe ADD HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 0 /f >C:\\Users\\${guest_user}\\ievms.bat"
+    guest_control_exec "${1}" "cmd.exe" /c \
+        "echo shutdown.exe /s /f /t 0 >>C:\\Users\\${guest_user}\\ievms.bat"
+
+    guest_control_exec "${1}" "schtasks.exe" /run /tn ievms
+
+    wait_for_shutdown "${1}"
+}
+
 # Install an alternative version of IE in a Win7 virtual machine. Downloads the
 # installer, copies it to the vm, then runs it before shutting down.
 install_ie_win7() { # vm url md5
@@ -447,6 +465,7 @@ build_ievm_ie7() {
     if [ "${reuse_xp}" != "yes" ]
     then
         boot_auto_ga "IE7 - Vista"
+        disable_uac_win7 "IE7 - Vista"
     else
         boot_auto_ga "IE7 - WinXP"
         set_xp_password "IE7 - WinXP"
@@ -459,6 +478,7 @@ build_ievm_ie8() {
     if [ "${reuse_xp}" != "yes" ]
     then
         boot_auto_ga "IE8 - Win7"
+        disable_uac_win7 "IE8 - Win7"
     else
         boot_auto_ga "IE8 - WinXP"
         set_xp_password "IE8 - WinXP"
@@ -469,6 +489,7 @@ build_ievm_ie8() {
 # Build the IE9 virtual machine.
 build_ievm_ie9() {
     boot_auto_ga "IE9 - Win7"
+    disable_uac_win7 "IE9 - Win7"
 }
 
 # Build the IE10 virtual machine, reusing the Win7 VM if requested (the default).
@@ -476,8 +497,10 @@ build_ievm_ie10() {
     if [ "${reuse_win7}" != "yes" ]
     then
         boot_auto_ga "IE10 - Win8"
+        disable_uac_win7 "IE10 - Win8"
     else
         boot_auto_ga "IE10 - Win7"
+        disable_uac_win7 "IE10 - Win7"
         install_ie_win7 "IE10 - Win7" "https://raw.githubusercontent.com/kbandla/installers/master/MSIE/IE10-Windows6.1-x86-en-us.exe" "0f14b2de0b3cef611b9c1424049e996b"
     fi
 }
@@ -485,7 +508,13 @@ build_ievm_ie10() {
 # Build the IE11 virtual machine, reusing the Win7 VM always.
 build_ievm_ie11() {
     boot_auto_ga "IE11 - Win7"
+    disable_uac_win7 "IE11 - Win7"
     install_ie_win7 "IE11 - Win7" "http://download.microsoft.com/download/9/2/F/92FC119C-3BCD-476C-B425-038A39625558/IE11-Windows6.1-x86-en-us.exe" "7d3479b9007f3c0670940c1b10a3615f"
+}
+
+build_ievm_ieEDGE() {
+    boot_auto_ga "MSEdge - Win10"
+    disable_uac_win7 "MSEdge - Win10"
 }
 
 # ## Main Entry Point
