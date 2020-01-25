@@ -420,6 +420,13 @@ build_ievm() {
         log "Creating ${vm} VM (disk: ${disk_path})"
         VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
 
+        if ! grep -E -q '(vmx|svm)' /proc/cpuinfo ; then
+            log "Disable VT-x/AMT-V on ${vm} (not available on your CPU)"
+            VBoxManage modifyvm "${vm}" --hwvirtex off --hwvirtexexcl off --vtxvpid off --nestedpaging off
+            # FIXME: still complains about VT-x if CPU count is not set to 1 (don't know why...)
+            VBoxManage modifyvm "${vm}" --cpus 1
+        fi
+    
         log "Adding shared folder"
         VBoxManage sharedfolder add "${vm}" --automount --name ievms \
             --hostpath "${ievms_home}"
