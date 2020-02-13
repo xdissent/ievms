@@ -334,7 +334,7 @@ build_ievm() {
     local build_timestamp
     if [ "${os}" == "Win10" ]
     then
-        build_timestamp="20180425"
+        build_timestamp="20190311"
     elif [ "${os}" == "Win81" ]
     then
         build_timestamp="20180102"
@@ -350,7 +350,7 @@ build_ievm() {
         IE10_Win7.zip)    md5="21d0dee59fd11bdfce237864ef79063b" ;;
         IE11_Win7.zip)    md5="24675c913c4a74c87dc11f8ccb6c8f9e" ;;
         IE11_Win81.zip)   md5="896db7a54336982241d25f704f35d6c2" ;;
-        MSEdge_Win10.zip) md5="fdbcfb79d36c6ffd424c9d36a88ddc02" ;;
+        MSEdge_Win10.zip) md5="b31441edbb30d6bc7df3202269c25cfd" ;;
     esac
 
     log "Checking for existing OVA at ${ievms_home}/${ova}"
