@@ -14,9 +14,6 @@ ievms_version="0.3.3"
 # Options passed to each `curl` command.
 curl_opts=${CURL_OPTS:-""}
 
-# Reuse XP virtual machines for IE versions that are supported.
-reuse_xp=${REUSE_XP:-"yes"}
-
 # Reuse Win7 virtual machines for IE versions that are supported.
 reuse_win7=${REUSE_WIN7:-"yes"}
 
@@ -161,12 +158,12 @@ check_ext_pack() {
     fi
 }
 
-# Download and install `unar` from Google Code.
+# Download and install `unar` from https://theunarchiver.com/ CDN
 install_unar() {
-    local url="http://unarchiver.c3.cx/downloads/unar1.10.1.zip"
+    local url="https://cdn.theunarchiver.com/downloads/unarMac.zip"
     local archive=`basename "${url}"`
 
-    download "unar" "${url}" "${archive}" "d548661e4b6c33512074df81e39ed874"
+    download "unar" "${url}" "${archive}" "91796924b1b21ee586ed904b319bb447"
 
     unzip "${archive}" || fail "Failed to extract ${ievms_home}/${archive} to ${ievms_home}/, unzip command returned error code $?"
 
@@ -217,14 +214,15 @@ find_iso() {
 # Attach a dvd image to the virtual machine.
 attach() {
     log "Attaching ${3}"
-    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 1 \
-        --device 0 --type dvddrive --medium "${2}"
+    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 0 \
+        --device 1 --type dvddrive --medium "${2}"
 }
 
 # Eject the dvd image from the virtual machine.
 eject() {
     log "Ejecting ${2}"
-    VBoxManage modifyvm "${1}" --dvd none
+    VBoxManage storageattach "${1}" --storagectl "IDE Controller" --port 0 \
+        --device 1 --type dvddrive --medium "emptydrive"
 }
 
 # Boot the virtual machine with the control ISO in the dvd drive then wait for
@@ -273,51 +271,6 @@ guest_control_exec() {
         --exe "${image}" -- "$@"
 }
 
-# Start an XP virtual machine and set the password for the guest user.
-set_xp_password() {
-    start_vm "${1}"
-    wait_for_guestcontrol "${1}"
-
-    log "Setting ${guest_user} password"
-    VBoxManage guestcontrol "${1}" run --username Administrator \
-        --password "${guest_pass}" --exe "net.exe" -- \
-        net.exe user "${guest_user}" "${guest_pass}"
-
-    log "Setting auto logon password"
-    VBoxManage guestcontrol "${1}" run --username Administrator \
-        --password "${guest_pass}" --exe "reg.exe" -- reg.exe add \
-        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
-        /f /v DefaultPassword /t REG_SZ /d "${guest_pass}"
-
-    log "Enabling auto admin logon"
-    VBoxManage guestcontrol "${1}" run --username Administrator \
-        --password "${guest_pass}" --exe "reg.exe" -- reg.exe add \
-        "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" \
-        /f /v AutoAdminLogon /t REG_SZ /d 1
-}
-
-# Shutdown an XP virtual machine and wait for it to power off.
-shutdown_xp() {
-    log "Shutting down ${1}"
-    guest_control_exec "${1}" "shutdown.exe" /s /f /t 0
-    wait_for_shutdown "${1}"
-}
-
-# Install an alternative version of IE in an XP virtual machine. Downloads the
-# installer, copies it to the vm, then runs it before shutting down.
-install_ie_xp() { # vm url md5
-    local src=`basename "${2}"`
-    local dest="C:\\Documents and Settings\\${guest_user}\\Desktop\\${src}"
-
-    download "${src}" "${2}" "${src}" "${3}"
-    copy_to_vm "${1}" "${src}" "${dest}"
-
-    log "Installing IE" # Always "fails"
-    guest_control_exec "${1}" "${dest}" /passive /norestart || true
-
-    shutdown_xp "${1}"
-}
-
 # Install an alternative version of IE in a Win7 virtual machine. Downloads the
 # installer, copies it to the vm, then runs it before shutting down.
 install_ie_win7() { # vm url md5
@@ -340,6 +293,7 @@ install_ie_win7() { # vm url md5
 }
 
 # Build an ievms virtual machine given the IE version desired.
+# VMs are downloaded from https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/
 build_ievm() {
     unset archive
     unset unit
@@ -347,24 +301,15 @@ build_ievm() {
     local suffix=""
     local version="${1}"
     case $1 in
-        6|7|8)
-            os="WinXP"
-            if [ "${reuse_xp}" != "yes" ]
-            then
-                if [ "$1" == "6" ]; then unit="10"; fi
-                if [ "$1" == "7" ]; then os="Vista"; fi
-                if [ "$1" == "8" ]; then os="Win7"; fi
-            else
-                archive="IE6_WinXP.zip"
-                unit="10"
-            fi
+        6|7)
+            fail "No longer supports IE6 or IE7"
             ;;
-        9) os="Win7" ;;
+        8|9) os="Win7" ;;
         10|11)
             if [ "${reuse_win7}" != "yes" ]
             then
-                if [ "$1" == "11" ]; then fail "IE11 is only available if REUSE_WIN7 is set"; fi
-                os="Win8"
+                if [ "$1" == "10" ]; then fail "IE10 is only available if REUSE_WIN7 is set"; fi
+                os="Win81"
             else
                 os="Win7"
                 archive="IE9_Win7.zip"
@@ -372,36 +317,40 @@ build_ievm() {
             ;;
         EDGE)
             prefix="MS"
-            suffix="_preview"
             version="Edge"
             os="Win10"
-            unit="8"
+            unit="10"
             ;;
         *) fail "Invalid IE version: ${1}" ;;
     esac
 
-    local vm="${prefix}${version} - ${os}"
+    local browser="${prefix}${version}"
+    local vm="${browser} - ${os}"
     local def_archive="${vm/ - /_}.zip"
     archive=${archive:-$def_archive}
-    unit=${unit:-"11"}
+    unit=${unit:-"9"}
     local ova="`basename "${archive/_/ - }" .zip`${suffix}.ova"
 
-    local url
+    local build_timestamp
     if [ "${os}" == "Win10" ]
     then
-        url="https://az792536.vo.msecnd.net/vms/VMBuild_20160802/VirtualBox/MSEdge/MSEdge.Win10_RS1.VirtualBox.zip"
+        build_timestamp="20190311"
+    elif [ "${os}" == "Win81" ]
+    then
+        build_timestamp="20180102"
     else
-        url="https://az412801.vo.msecnd.net/vhd/IEKitV1_Final/VirtualBox/OSX/${archive}"
+        build_timestamp="20150916"
     fi
+    local url="https://az792536.vo.msecnd.net/vms/VMBuild_${build_timestamp}/VirtualBox/${browser}/${browser}.${os}.VirtualBox.zip"
 
     local md5
     case $archive in
-        IE6_WinXP.zip) md5="3d5b7d980296d048de008d28305ca224" ;;
-        IE7_Vista.zip) md5="d5269b2220f5c7fb9786dad513f2c05a" ;;
-        IE8_Win7.zip) md5="21b0aad3d66dac7f88635aa2318a3a55" ;;
-        IE9_Win7.zip) md5="58d201fe7dc7e890ad645412264f2a2c" ;;
-        IE10_Win8.zip) md5="cc4e2f4b195e1b1e24e2ce6c7a6f149c" ;;
-        MSEdge_Win10.zip) md5="467d8286cb8cbed90f0761c3566abdda" ;;
+        IE8_Win7.zip)     md5="342e3d2d163f3ce345cfaa9cb5fa8012" ;;
+        IE9_Win7.zip)     md5="0e1d3669b426fce8b0d772665f113302" ;;
+        IE10_Win7.zip)    md5="21d0dee59fd11bdfce237864ef79063b" ;;
+        IE11_Win7.zip)    md5="24675c913c4a74c87dc11f8ccb6c8f9e" ;;
+        IE11_Win81.zip)   md5="896db7a54336982241d25f704f35d6c2" ;;
+        MSEdge_Win10.zip) md5="b31441edbb30d6bc7df3202269c25cfd" ;;
     esac
 
     log "Checking for existing OVA at ${ievms_home}/${ova}"
@@ -418,7 +367,8 @@ build_ievm() {
     then
         local disk_path="${ievms_home}/${vm}-disk1.vmdk"
         log "Creating ${vm} VM (disk: ${disk_path})"
-        VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" --unit "${unit}" --disk "${disk_path}"
+        VBoxManage import "${ova}" --vsys 0 --vmname "${vm}" \
+            --unit "${unit}" --disk "${disk_path}"
 
         log "Adding shared folder"
         VBoxManage sharedfolder add "${vm}" --automount --name ievms \
@@ -435,35 +385,9 @@ build_ievm() {
     fi
 }
 
-# Build the IE6 virtual machine.
-build_ievm_ie6() {
-    boot_auto_ga "IE6 - WinXP"
-    set_xp_password "IE6 - WinXP"
-    shutdown_xp "IE6 - WinXP"
-}
-
-# Build the IE7 virtual machine, reusing the XP VM if requested (the default).
-build_ievm_ie7() {
-    if [ "${reuse_xp}" != "yes" ]
-    then
-        boot_auto_ga "IE7 - Vista"
-    else
-        boot_auto_ga "IE7 - WinXP"
-        set_xp_password "IE7 - WinXP"
-        install_ie_xp "IE7 - WinXP" "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe" "ea16789f6fc1d2523f704e8f9afbe906"
-    fi
-}
-
-# Build the IE8 virtual machine, reusing the XP VM if requested (the default).
+# Build the IE8 virtual machine.
 build_ievm_ie8() {
-    if [ "${reuse_xp}" != "yes" ]
-    then
-        boot_auto_ga "IE8 - Win7"
-    else
-        boot_auto_ga "IE8 - WinXP"
-        set_xp_password "IE8 - WinXP"
-        install_ie_xp "IE8 - WinXP" "http://download.microsoft.com/download/C/C/0/CC0BD555-33DD-411E-936B-73AC6F95AE11/IE8-WindowsXP-x86-ENU.exe" "616c2e8b12aaa349cd3acb38bf581700"
-    fi
+    boot_auto_ga "IE8 - Win7"
 }
 
 # Build the IE9 virtual machine.
@@ -471,21 +395,21 @@ build_ievm_ie9() {
     boot_auto_ga "IE9 - Win7"
 }
 
-# Build the IE10 virtual machine, reusing the Win7 VM if requested (the default).
+# Build the IE10 virtual machine.
 build_ievm_ie10() {
-    if [ "${reuse_win7}" != "yes" ]
-    then
-        boot_auto_ga "IE10 - Win8"
-    else
-        boot_auto_ga "IE10 - Win7"
-        install_ie_win7 "IE10 - Win7" "https://raw.githubusercontent.com/kbandla/installers/master/MSIE/IE10-Windows6.1-x86-en-us.exe" "0f14b2de0b3cef611b9c1424049e996b"
-    fi
+    boot_auto_ga "IE10 - Win7"
+    install_ie_win7 "IE10 - Win7" "https://raw.githubusercontent.com/kbandla/installers/master/MSIE/IE10-Windows6.1-x86-en-us.exe" "0f14b2de0b3cef611b9c1424049e996b"
 }
 
-# Build the IE11 virtual machine, reusing the Win7 VM always.
+# Build the IE11 virtual machine, reusing the Win7 VM if requested (the default).
 build_ievm_ie11() {
-    boot_auto_ga "IE11 - Win7"
-    install_ie_win7 "IE11 - Win7" "http://download.microsoft.com/download/9/2/F/92FC119C-3BCD-476C-B425-038A39625558/IE11-Windows6.1-x86-en-us.exe" "7d3479b9007f3c0670940c1b10a3615f"
+    if [ "${reuse_win7}" != "yes" ]
+    then
+        boot_auto_ga "IE11 - Win81"
+    else
+        boot_auto_ga "IE11 - Win7"
+        install_ie_win7 "IE11 - Win7" "http://download.microsoft.com/download/9/2/F/92FC119C-3BCD-476C-B425-038A39625558/IE11-Windows6.1-x86-en-us.exe" "7d3479b9007f3c0670940c1b10a3615f"
+    fi
 }
 
 # ## Main Entry Point
@@ -498,7 +422,7 @@ check_ext_pack
 check_unar
 
 # Install each requested virtual machine sequentially.
-all_versions="6 7 8 9 10 11 EDGE"
+all_versions="8 9 10 11 EDGE"
 for ver in ${IEVMS_VERSIONS:-$all_versions}
 do
     log "Building IE ${ver} VM"
